@@ -27,8 +27,6 @@ dotnet ef migrations add <Name>
 dotnet ef database update
 ```
 
-The global `dotnet-ef` tool installed is 9.x while the project uses EF Core 10 packages; update it (`dotnet tool update -g dotnet-ef`) if it complains about version mismatch.
-
 ## Architecture
 
 - **Database**: SQL Server via `ConnectionStrings:DefaultConnection` in `appsettings.json` — `Server=localhost;Database=RestaurantDb;Trusted_Connection=True` (Windows auth, local default instance).
