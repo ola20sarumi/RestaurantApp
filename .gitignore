@@ -1,0 +1,19 @@
+# .NET build output
+bin/
+obj/
+
+# IDE / editor
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Node / Angular (frontend)
+node_modules/
+dist/
+.angular/
+
+# OS
+Thumbs.db
+.DS_Store
