@@ -19,5 +19,13 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Product>().Property(p => p.Price).HasPrecision(18, 2);
         modelBuilder.Entity<Order>().Property(o => o.TotalAmount).HasPrecision(18, 2);
         modelBuilder.Entity<OrderItem>().Property(oi => oi.UnitPrice).HasPrecision(18, 2);
+
+        modelBuilder.Entity<Order>(order =>
+        {
+            order.Property(o => o.CustomerName).HasMaxLength(100);
+            order.Property(o => o.CustomerPhone).HasMaxLength(30);
+            order.Property(o => o.FulfillmentType).HasMaxLength(20).HasDefaultValue("Takeout");
+            order.Property(o => o.DeliveryAddress).HasMaxLength(300);
+        });
     }
 }

@@ -1,26 +1,54 @@
-@if (placedOrder(); as order) {
+@let order = placedOrder();
+@if (order) {
+  <!-- Success confirmation -->
   <div class="card border-0 shadow-sm text-center mx-auto confirmation">
     <div class="card-body p-4 p-md-5">
       <i class="bi bi-check-circle-fill text-success display-4 d-block mb-3"></i>
-      <h1 class="h3 fw-bold">Thank you! Your order is in.</h1>
-      <p class="text-body-secondary">We'll start preparing it right away.</p>
+      <h1 class="h3 fw-bold">🎉 Order Placed Successfully!</h1>
+      <p class="lead mt-2">Your Order ID is <strong>#{{ order.id }}</strong>.</p>
 
-      <div class="d-flex justify-content-center gap-4 my-4">
-        <div>
-          <div class="small text-body-secondary">Order number</div>
-          <div class="fs-4 fw-bold">#{{ order.id }}</div>
-        </div>
+      @switch (order.fulfillmentType) {
+        @case ('DineIn') {
+          <p class="text-body-secondary">
+            Thanks, {{ order.customerName }}! Please take a seat — we'll bring your food to your table.
+          </p>
+        }
+        @case ('Takeout') {
+          <p class="text-body-secondary">
+            Thanks, {{ order.customerName }}! We'll have it ready at the counter. Just give us your order number.
+          </p>
+        }
+        @default {
+          <p class="text-body-secondary">
+            Thanks, {{ order.customerName }}! We have received your details and are preparing your order.
+          </p>
+        }
+      }
+
+      <div class="d-flex flex-wrap justify-content-center gap-4 my-4">
         <div>
           <div class="small text-body-secondary">Total</div>
-          <div class="fs-4 fw-bold">{{ order.totalAmount | currency }}</div>
+          <div class="fs-5 fw-bold">{{ order.totalAmount | currency }}</div>
+        </div>
+        <div>
+          <div class="small text-body-secondary">Order type</div>
+          <div class="fs-5 fw-bold">
+            @if (placedOrderOption(); as option) {
+              <i [class]="'bi me-1 ' + option.icon"></i>{{ option.label }}
+            }
+          </div>
         </div>
         <div>
           <div class="small text-body-secondary">Status</div>
-          <div class="fs-4"><span class="badge text-bg-warning">{{ order.status }}</span></div>
+          <div class="fs-5"><span class="badge text-bg-warning">{{ order.status }}</span></div>
         </div>
       </div>
 
-      <a routerLink="/menu" class="btn btn-primary">Back to the menu</a>
+      @if (order.deliveryAddress) {
+        <p class="small text-body-secondary mb-4">Delivering to: {{ order.deliveryAddress }}</p>
+      }
+
+      <a routerLink="/menu" class="btn btn-primary btn-lg">Back to Menu</a>
     </div>
   </div>
 } @else {
@@ -33,24 +61,86 @@
       <a routerLink="/menu" class="btn btn-primary">Browse the menu</a>
     </div>
   } @else {
-    <div class="row justify-content-center">
-      <div class="col-lg-7">
-        <div class="card border-0 shadow-sm">
-          <div class="card-body p-4">
-            <h2 class="h5 mb-3">Review your order</h2>
-            <ul class="list-group list-group-flush mb-3">
-              @for (item of cart.items(); track item.product.id) {
-                <li class="list-group-item d-flex justify-content-between px-0">
-                  <span><span class="text-body-secondary">{{ item.quantity }} ×</span> {{ item.product.name }}</span>
-                  <span class="fw-semibold">{{ item.product.price * item.quantity | currency }}</span>
-                </li>
+    <div class="row g-4">
+      <!-- Form section -->
+      <div class="col-md-7">
+        <div class="card border-0 shadow-sm p-4">
+          <form #checkoutForm="ngForm" (ngSubmit)="submitOrder(checkoutForm)" novalidate>
+            <!-- Step 1: order type -->
+            <fieldset class="mb-4">
+              <legend class="h5 mb-3">How would you like your order?</legend>
+              <div class="row row-cols-1 row-cols-sm-3 g-2">
+                @for (option of fulfillmentOptions; track option.value) {
+                  <div class="col">
+                    <input type="radio" class="btn-check" name="fulfillmentType" [id]="'type-' + option.value"
+                           [value]="option.value" [ngModel]="fulfillmentType" (ngModelChange)="selectOrderType($event)">
+                    <label class="btn btn-outline-primary w-100 h-100 py-3 order-type" [for]="'type-' + option.value">
+                      <i [class]="'bi d-block fs-3 mb-1 ' + option.icon"></i>
+                      <span class="fw-semibold d-block">{{ option.label }}</span>
+                      <small class="hint d-block">{{ option.hint }}</small>
+                    </label>
+                  </div>
+                }
+              </div>
+              @if (checkoutForm.submitted && !fulfillmentType) {
+                <div class="text-danger small mt-2" role="alert">Please choose how you'd like your order.</div>
               }
-            </ul>
+            </fieldset>
 
-            <div class="d-flex justify-content-between fs-5 fw-bold mb-4">
-              <span>Total</span>
-              <span>{{ cart.total() | currency }}</span>
-            </div>
+            <!-- Step 2: customer details — name always; phone for takeout/delivery; address for delivery -->
+            @if (fulfillmentType) {
+              <h2 class="h5 mb-3">
+                @switch (fulfillmentType) {
+                  @case ('DineIn') {
+                    Your name
+                  }
+                  @case ('Takeout') {
+                    Pickup details
+                  }
+                  @default {
+                    Delivery details
+                  }
+                }
+              </h2>
+
+              <div class="mb-3">
+                <label class="form-label fw-semibold" for="customerName">Full Name *</label>
+                <input id="customerName" type="text" class="form-control" name="customerName"
+                       [(ngModel)]="customerName" #nameField="ngModel"
+                       required maxlength="100" autocomplete="name" placeholder="e.g. Jane Doe"
+                       [class.is-invalid]="nameField.invalid && (nameField.touched || checkoutForm.submitted)">
+                <div class="invalid-feedback">Please enter your name.</div>
+                @if (fulfillmentType === 'DineIn') {
+                  <div class="form-text">So we know whose order it is when we bring it to your table.</div>
+                }
+              </div>
+
+              @if (needsPhone) {
+                <div class="mb-3">
+                  <label class="form-label fw-semibold" for="customerPhone">Phone Number *</label>
+                  <input id="customerPhone" type="tel" class="form-control" name="customerPhone"
+                         [(ngModel)]="customerPhone" #phoneField="ngModel"
+                         required maxlength="30" pattern="[0-9+\(\)\-\s]{7,30}" autocomplete="tel"
+                         placeholder="e.g. (555) 123-4567"
+                         [class.is-invalid]="phoneField.invalid && (phoneField.touched || checkoutForm.submitted)">
+                  <div class="invalid-feedback">
+                    {{ phoneField.errors?.['required'] ? 'Please enter your phone number.' : 'Please enter a valid phone number.' }}
+                  </div>
+                </div>
+              }
+
+              @if (fulfillmentType === 'Delivery') {
+                <div class="mb-3">
+                  <label class="form-label fw-semibold" for="deliveryAddress">Delivery Address *</label>
+                  <textarea id="deliveryAddress" class="form-control" name="deliveryAddress" rows="3"
+                            [(ngModel)]="deliveryAddress" #addressField="ngModel"
+                            required maxlength="300" autocomplete="street-address"
+                            placeholder="Street address, Apartment/Suite #, City, Zip Code"
+                            [class.is-invalid]="addressField.invalid && (addressField.touched || checkoutForm.submitted)"></textarea>
+                  <div class="invalid-feedback">Please enter your delivery address.</div>
+                </div>
+              }
+            }
 
             @if (error()) {
               <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
@@ -59,17 +149,37 @@
               </div>
             }
 
-            <div class="d-flex justify-content-between align-items-center">
-              <a routerLink="/cart" class="btn btn-link px-0"><i class="bi bi-arrow-left me-1"></i>Edit cart</a>
-              <button type="button" class="btn btn-primary btn-lg" (click)="placeOrder()" [disabled]="submitting()">
-                @if (submitting()) {
-                  <span class="spinner-border spinner-border-sm me-2" role="status"></span>Placing order…
-                } @else {
-                  Place order
-                }
-              </button>
-            </div>
+            <button type="submit" class="btn btn-primary btn-lg w-100 mt-2" [disabled]="isSubmitting()">
+              @if (isSubmitting()) {
+                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Submitting Order…
+              } @else {
+                Confirm &amp; Place Order
+              }
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Order summary sidebar -->
+      <div class="col-md-5">
+        <div class="card border-0 shadow-sm p-4">
+          <h2 class="h5 mb-3">Order Summary</h2>
+          <ul class="list-group list-group-flush mb-3">
+            @for (item of cart.items(); track item.product.id) {
+              <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                <div>
+                  <div class="fw-semibold">{{ item.product.name }}</div>
+                  <small class="text-body-secondary">Qty: {{ item.quantity }} × {{ item.product.price | currency }}</small>
+                </div>
+                <span class="fw-bold">{{ item.product.price * item.quantity | currency }}</span>
+              </li>
+            }
+          </ul>
+          <div class="d-flex justify-content-between fs-5 fw-bold border-top pt-3">
+            <span>Total:</span>
+            <span>{{ cart.total() | currency }}</span>
           </div>
+          <a routerLink="/cart" class="btn btn-link px-0 mt-2 align-self-start"><i class="bi bi-arrow-left me-1"></i>Edit cart</a>
         </div>
       </div>
     </div>

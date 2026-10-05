@@ -1,7 +1,7 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Injectable, PLATFORM_ID, computed, effect, inject, signal } from '@angular/core';
 
-import { CartItem, CreateOrderRequest, Product } from '../models/restaurant.models';
+import { CartItem, CreateOrderRequest, CustomerDetails, Product } from '../models/restaurant.models';
 
 const STORAGE_KEY = 'restaurant-cart';
 
@@ -47,8 +47,12 @@ export class CartService {
     this._items.set([]);
   }
 
-  toOrderRequest(): CreateOrderRequest {
-    return { items: this._items().map(i => ({ productId: i.product.id, quantity: i.quantity })) };
+  /** Builds the POST /api/orders body. Prices are not sent; the server looks them up. */
+  toOrderRequest(details: CustomerDetails): CreateOrderRequest {
+    return {
+      ...details,
+      items: this._items().map(i => ({ productId: i.product.id, quantity: i.quantity }))
+    };
   }
 
   private load(): CartItem[] {

@@ -1,7 +1,7 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 
-import { ORDER_STATUSES, Order } from '../../../models/restaurant.models';
+import { FULFILLMENT_OPTIONS, ORDER_STATUSES, Order } from '../../../models/restaurant.models';
 import { OrderService } from '../../../services/order.service';
 
 @Component({
@@ -41,6 +41,10 @@ export class DashboardComponent implements OnInit {
   filterBy(status: string): void {
     this.statusFilter.set(status);
     this.loadOrders();
+  }
+
+  fulfillmentOption(type: string) {
+    return FULFILLMENT_OPTIONS.find(o => o.value === type);
   }
 
   badgeClass(status: string): string {

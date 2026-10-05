@@ -38,6 +38,22 @@
             <span class="ms-auto small text-body-secondary">{{ order.orderDate + 'Z' | date: 'short' }}</span>
           </div>
           <div class="card-body">
+            <div class="mb-3 pb-3 border-bottom small">
+              <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                <span class="fw-semibold fs-6">{{ order.customerName || (order.fulfillmentType === 'DineIn' ? 'Eat-in guest' : 'Walk-in customer') }}</span>
+                @if (fulfillmentOption(order.fulfillmentType); as option) {
+                  <span class="badge" [class]="option.value === 'Delivery' ? 'text-bg-primary' : 'text-bg-light'">
+                    <i class="bi me-1" [class]="option.icon"></i>{{ option.label }}
+                  </span>
+                }
+              </div>
+              @if (order.customerPhone) {
+                <div><i class="bi bi-telephone me-1 text-body-secondary"></i><a [href]="'tel:' + order.customerPhone">{{ order.customerPhone }}</a></div>
+              }
+              @if (order.deliveryAddress) {
+                <div><i class="bi bi-geo-alt me-1 text-body-secondary"></i>{{ order.deliveryAddress }}</div>
+              }
+            </div>
             <ul class="list-unstyled mb-3">
               @for (item of order.items; track item.id) {
                 <li class="d-flex justify-content-between">

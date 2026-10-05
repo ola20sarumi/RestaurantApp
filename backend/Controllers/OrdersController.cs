@@ -34,10 +34,16 @@ public class OrdersController : ControllerBase
             return BadRequest($"Products not found or unavailable: {string.Join(", ", missing)}");
         }
 
+        var isDineIn = request.FulfillmentType == CreateOrderRequest.DineIn;
         var order = new Order
         {
             OrderDate = DateTime.UtcNow,
             Status = "Pending",
+            FulfillmentType = request.FulfillmentType,
+            CustomerName = request.CustomerName.Trim(),
+            // Eat-in orders only take a name; phone is kept for takeout/delivery.
+            CustomerPhone = isDineIn ? string.Empty : request.CustomerPhone!.Trim(),
+            DeliveryAddress = request.FulfillmentType == CreateOrderRequest.Delivery ? request.DeliveryAddress!.Trim() : null,
             Items = request.Items.Select(i => new OrderItem
             {
                 ProductId = i.ProductId,
