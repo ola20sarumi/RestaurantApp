@@ -1,0 +1,54 @@
+/* Global theme on top of Bootstrap (loaded first via angular.json). */
+
+:root {
+  --brand: #c2410c;
+  --brand-dark: #9a3412;
+  --brand-soft: #fff1e6;
+
+  --bs-body-bg: #faf8f5;
+  --bs-body-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --bs-link-color-rgb: 194, 65, 12;
+  --bs-link-hover-color-rgb: 154, 52, 18;
+  --bs-primary: var(--brand);
+  --bs-primary-rgb: 194, 65, 12;
+}
+
+/* Bootstrap buttons use their own variables, so the brand colour is applied per variant. */
+.btn-primary {
+  --bs-btn-bg: var(--brand);
+  --bs-btn-border-color: var(--brand);
+  --bs-btn-hover-bg: var(--brand-dark);
+  --bs-btn-hover-border-color: var(--brand-dark);
+  --bs-btn-active-bg: var(--brand-dark);
+  --bs-btn-active-border-color: var(--brand-dark);
+  --bs-btn-disabled-bg: var(--brand);
+  --bs-btn-disabled-border-color: var(--brand);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--brand);
+  --bs-btn-border-color: var(--brand);
+  --bs-btn-hover-bg: var(--brand);
+  --bs-btn-hover-border-color: var(--brand);
+  --bs-btn-active-bg: var(--brand-dark);
+  --bs-btn-active-border-color: var(--brand-dark);
+}
+
+.text-brand {
+  color: var(--brand) !important;
+}
+
+.card {
+  --bs-card-bg: #fff;
+}
+
+.list-group {
+  --bs-list-group-bg: #fff;
+}
+
+.btn-link {
+  --bs-btn-color: var(--brand);
+  --bs-btn-hover-color: var(--brand-dark);
+  --bs-btn-active-color: var(--brand-dark);
+  text-decoration: none;
+}

@@ -1,0 +1,11 @@
+.qty {
+  width: 120px;
+}
+
+.qty .input-group-text {
+  min-width: 40px;
+}
+
+.subtotal {
+  min-width: 80px;
+}

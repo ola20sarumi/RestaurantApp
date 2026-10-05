@@ -1,0 +1,8 @@
+.nav-link.active {
+  color: var(--brand) !important;
+  font-weight: 600;
+}
+
+main {
+  max-width: 1140px;
+}

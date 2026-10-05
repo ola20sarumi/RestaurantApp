@@ -1,4 +1,5 @@
 using backend.Data;
+using backend.Dtos;
 using backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,8 @@ namespace backend.Controllers;
 [Route("api/[controller]")]
 public class OrdersController : ControllerBase
 {
+    private static readonly string[] AllowedStatuses = ["Pending", "Preparing", "Ready", "Completed", "Cancelled"];
+
     private readonly AppDbContext _context;
 
     public OrdersController(AppDbContext context)
@@ -18,11 +21,32 @@ public class OrdersController : ControllerBase
 
     // Customer: Submit a new order
     [HttpPost]
-    public async Task<ActionResult<Order>> CreateOrder(Order order)
+    public async Task<ActionResult<Order>> CreateOrder(CreateOrderRequest request)
     {
-        order.OrderDate = DateTime.UtcNow;
-        order.Status = "Pending";
-        
+        var productIds = request.Items.Select(i => i.ProductId).Distinct().ToList();
+        var products = await _context.Products
+            .Where(p => productIds.Contains(p.Id) && p.IsAvailable)
+            .ToDictionaryAsync(p => p.Id);
+
+        var missing = productIds.Where(id => !products.ContainsKey(id)).ToList();
+        if (missing.Count > 0)
+        {
+            return BadRequest($"Products not found or unavailable: {string.Join(", ", missing)}");
+        }
+
+        var order = new Order
+        {
+            OrderDate = DateTime.UtcNow,
+            Status = "Pending",
+            Items = request.Items.Select(i => new OrderItem
+            {
+                ProductId = i.ProductId,
+                Quantity = i.Quantity,
+                UnitPrice = products[i.ProductId].Price
+            }).ToList()
+        };
+        order.TotalAmount = order.Items.Sum(i => i.UnitPrice * i.Quantity);
+
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();
 
@@ -64,6 +88,11 @@ public class OrdersController : ControllerBase
     [HttpPut("{id}/status")]
     public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] string status)
     {
+        if (!AllowedStatuses.Contains(status))
+        {
+            return BadRequest($"Status must be one of: {string.Join(", ", AllowedStatuses)}");
+        }
+
         var order = await _context.Orders.FindAsync(id);
         if (order == null) return NotFound();
 

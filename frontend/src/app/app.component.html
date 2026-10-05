@@ -1,0 +1,33 @@
+<nav class="navbar navbar-expand bg-white border-bottom sticky-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-brand d-flex align-items-center gap-2" routerLink="/menu">
+      <i class="bi bi-shop"></i>
+      <span>Restaurant</span>
+    </a>
+
+    <ul class="navbar-nav ms-auto align-items-center gap-1">
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/menu" routerLinkActive="active">
+          <i class="bi bi-book me-1"></i><span class="d-none d-sm-inline">Menu</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link position-relative" routerLink="/cart" routerLinkActive="active">
+          <i class="bi bi-bag me-1"></i><span class="d-none d-sm-inline">Cart</span>
+          @if (cart.count() > 0) {
+            <span class="badge rounded-pill bg-primary ms-1">{{ cart.count() }}</span>
+          }
+        </a>
+      </li>
+      <li class="nav-item ms-sm-2">
+        <a class="btn btn-sm btn-outline-secondary" routerLink="/cashier" routerLinkActive="active">
+          <i class="bi bi-person-badge me-1"></i><span class="d-none d-sm-inline">Cashier</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<main class="container py-4">
+  <router-outlet />
+</main>

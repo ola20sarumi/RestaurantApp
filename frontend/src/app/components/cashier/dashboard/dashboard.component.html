@@ -1,0 +1,76 @@
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <h1 class="h3 fw-bold mb-0"><i class="bi bi-person-badge me-2 text-brand"></i>Cashier dashboard</h1>
+
+  <div class="d-flex align-items-center gap-2">
+    <select class="form-select form-select-sm" aria-label="Filter by status"
+            [value]="statusFilter()" (change)="filterBy($any($event.target).value)">
+      <option value="">All statuses</option>
+      @for (status of statuses; track status) {
+        <option [value]="status">{{ status }}</option>
+      }
+    </select>
+    <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap" (click)="loadOrders()">
+      <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+    </button>
+  </div>
+</div>
+
+@if (error()) {
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error() }}</span>
+  </div>
+}
+
+@if (loading()) {
+  <div class="d-flex align-items-center gap-2 text-body-secondary py-5 justify-content-center">
+    <div class="spinner-border spinner-border-sm" role="status"></div>
+    <span>Loading orders…</span>
+  </div>
+} @else {
+  <div class="row row-cols-1 row-cols-md-2 g-3">
+    @for (order of orders(); track order.id) {
+      <div class="col">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-header bg-white d-flex align-items-center gap-2">
+            <span class="fw-bold">#{{ order.id }}</span>
+            <span class="badge rounded-pill" [class]="badgeClass(order.status)">{{ order.status }}</span>
+            <span class="ms-auto small text-body-secondary">{{ order.orderDate + 'Z' | date: 'short' }}</span>
+          </div>
+          <div class="card-body">
+            <ul class="list-unstyled mb-3">
+              @for (item of order.items; track item.id) {
+                <li class="d-flex justify-content-between">
+                  <span><span class="text-body-secondary">{{ item.quantity }} ×</span> {{ item.product?.name ?? 'Product #' + item.productId }}</span>
+                  <span>{{ item.unitPrice * item.quantity | currency }}</span>
+                </li>
+              }
+            </ul>
+            <div class="d-flex justify-content-between fw-bold border-top pt-2">
+              <span>Total</span>
+              <span>{{ order.totalAmount | currency }}</span>
+            </div>
+          </div>
+          <div class="card-footer bg-white">
+            <div class="d-flex flex-wrap gap-1">
+              @for (status of statuses; track status) {
+                <button type="button" class="btn btn-sm"
+                        [class.btn-primary]="status === order.status"
+                        [class.btn-outline-secondary]="status !== order.status"
+                        [disabled]="status === order.status"
+                        (click)="setStatus(order, status)">
+                  {{ status }}
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <div class="col-12 text-center text-body-secondary py-5">
+        <i class="bi bi-inbox display-4 d-block mb-3"></i>
+        <p class="mb-0">No orders{{ statusFilter() ? ' with status ' + statusFilter() : '' }} yet.</p>
+      </div>
+    }
+  </div>
+}
