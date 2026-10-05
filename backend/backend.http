@@ -1,6 +1,33 @@
 @backend_HostAddress = http://localhost:5044
 
-GET {{backend_HostAddress}}/weatherforecast/
+GET {{backend_HostAddress}}/api/categories
 Accept: application/json
+
+###
+
+GET {{backend_HostAddress}}/api/products
+Accept: application/json
+
+###
+
+GET {{backend_HostAddress}}/api/orders
+Accept: application/json
+
+###
+
+GET {{backend_HostAddress}}/api/orders?status=Pending
+Accept: application/json
+
+###
+
+GET {{backend_HostAddress}}/api/orders/1
+Accept: application/json
+
+###
+
+PUT {{backend_HostAddress}}/api/orders/1/status
+Content-Type: application/json
+
+"Completed"
 
 ###
