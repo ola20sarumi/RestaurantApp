@@ -28,11 +28,11 @@ jobs:
       ConnectionStrings__DefaultConnection: Server=localhost,1433;Database=RestaurantDb;User Id=sa;Password=Ci_Test_Passw0rd!;TrustServerCertificate=True
       ASPNETCORE_ENVIRONMENT: Development
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-dotnet@v4
+    - uses: actions/checkout@v5
+    - uses: actions/setup-dotnet@v5
       with:
         dotnet-version: 10.0.x
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v5
       with:
         node-version: 22
         cache: npm
@@ -41,7 +41,8 @@ jobs:
       working-directory: backend
       run: |
         dotnet tool install --global dotnet-ef --version "10.*"
-        dotnet ef database update
+        dotnet build
+        dotnet ef database update --no-build
     - name: Install dependencies
       working-directory: frontend
       run: npm ci
@@ -51,7 +52,7 @@ jobs:
     - name: Run Playwright tests
       working-directory: frontend
       run: npx playwright test
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v5
       if: ${{ !cancelled() }}
       with:
         name: playwright-report
