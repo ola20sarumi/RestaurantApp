@@ -49,6 +49,8 @@ npx playwright show-report         # open the HTML report from the last run
 
 Playwright (`playwright.config.ts`) starts the API (`dotnet run --project ../backend`) and `ng serve`, or reuses ones already running. The tests hit the real API and SQL Server database, and they **create real orders**. Pages are server-rendered, so open them with `gotoApp()` from `tests/helpers.ts`, which waits for hydration; clicks made before hydration do nothing. Staff pages need a login: `loginAs(page, request, 'admin' | 'cashier')` from `tests/helpers.ts` gets a token from the API and stores the session in `localStorage` before the page opens (the `STAFF` credentials there match the dev seed). Local runs use 4 workers, because more than that overloads the dev SSR server and tests time out.
 
+CI (`.github/workflows/playwright.yml` at the repo root, on push/PR to `main`) runs the same suite against a SQL Server service container. It overrides `ConnectionStrings__DefaultConnection` with SQL auth, sets `ASPNETCORE_ENVIRONMENT=Development` (for the JWT key and staff accounts), and runs `dotnet ef database update` to create and seed the database first. CI uses 1 worker with 2 retries.
+
 `src/main.server.ts` must pass the `BootstrapContext` through to `bootstrapApplication` (required by Angular 19.2.x patch releases); without it the build fails during route extraction with `NG0401: Missing Platform`. Likewise, SSR only renders for hosts listed in `angular.json` → `build.options.security.allowedHosts` (currently `localhost`, `127.0.0.1`); other hosts silently fall back to client-side rendering — add the production hostname there when deploying.
 
 ### Frontend ↔ API
