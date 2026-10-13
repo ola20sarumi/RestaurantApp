@@ -12,6 +12,7 @@ import { CartService } from './services/cart.service';
 })
 export class AppComponent {
   title = 'frontend';
+  readonly year = new Date().getFullYear();
   readonly cart = inject(CartService);
   readonly auth = inject(AuthService);
   private readonly router = inject(Router);

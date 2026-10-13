@@ -65,5 +65,5 @@ export async function loginAs(page: Page, request: APIRequestContext, who: keyof
   const response = await request.post(`${API_URL}/auth/login`, { data: STAFF[who] });
   expect(response.ok()).toBeTruthy();
   const session = await response.json();
-  await page.addInitScript(value => localStorage.setItem('restaurant-staff-session', value), JSON.stringify(session));
+  await page.addInitScript(value => sessionStorage.setItem('restaurant-staff-session', value), JSON.stringify(session));
 }

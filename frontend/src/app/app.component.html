@@ -37,12 +37,6 @@
             <i class="bi bi-box-arrow-right me-1"></i><span class="d-none d-sm-inline">Sign out</span>
           </button>
         </li>
-      } @else {
-        <li class="nav-item ms-sm-2">
-          <a class="btn btn-sm btn-outline-secondary" routerLink="/login" routerLinkActive="active">
-            <i class="bi bi-person-lock me-1"></i><span class="d-none d-sm-inline">Staff</span>
-          </a>
-        </li>
       }
     </ul>
   </div>
@@ -51,3 +45,10 @@
 <main class="container py-4">
   <router-outlet />
 </main>
+
+<footer class="container border-top py-3 small text-muted d-flex justify-content-between">
+  <span>&copy; {{ year }} Restaurant</span>
+  @if (!auth.session()) {
+    <a class="link-secondary text-decoration-none" routerLink="/login">Staff login</a>
+  }
+</footer>

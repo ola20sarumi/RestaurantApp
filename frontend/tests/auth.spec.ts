@@ -47,6 +47,36 @@ test.describe('Staff login', () => {
     await expect(page.locator('nav').getByRole('link', { name: 'Admin' })).toHaveCount(0);
   });
 
+  test('customers see a footer staff link, not navbar staff links', async ({ page }) => {
+    await gotoApp(page, '/menu');
+    await expect(page.locator('nav').getByRole('link', { name: /staff|admin|cashier/i })).toHaveCount(0);
+
+    await page.locator('footer').getByRole('link', { name: 'Staff login' }).click();
+    await expect(page).toHaveURL(/\/login$/);
+  });
+
+  test('signing out in one tab keeps other tabs signed in', async ({ context }) => {
+    const signIn = async (who: keyof typeof STAFF) => {
+      const page = await context.newPage();
+      await gotoApp(page, '/login');
+      await page.getByLabel('Username').fill(STAFF[who].username);
+      await page.getByLabel('Password').fill(STAFF[who].password);
+      await page.getByRole('button', { name: 'Sign in' }).click();
+      return page;
+    };
+    const adminPage = await signIn('admin');
+    await expect(adminPage).toHaveURL(/\/admin$/);
+    const cashierPage = await signIn('cashier');
+    await expect(cashierPage).toHaveURL(/\/cashier$/);
+
+    await cashierPage.getByRole('button', { name: 'Sign out' }).click();
+    await expect(cashierPage).toHaveURL(/\/login$/);
+
+    await adminPage.reload();
+    await expect(adminPage).toHaveURL(/\/admin$/);
+    await expect(adminPage.getByRole('button', { name: 'Sign out' })).toBeVisible();
+  });
+
   test('the API rejects staff calls without a token', async ({ request }) => {
     expect((await request.get(`${API_URL}/orders`)).status()).toBe(401);
     expect((await request.post(`${API_URL}/categories`, { data: { name: 'Nope' } })).status()).toBe(401);

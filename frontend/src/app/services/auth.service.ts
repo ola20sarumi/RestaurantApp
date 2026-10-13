@@ -8,7 +8,7 @@ import { LoginRequest, StaffRole, StaffSession } from '../models/restaurant.mode
 
 const STORAGE_KEY = 'restaurant-staff-session';
 
-/** Staff login for the admin and cashier pages. The session (JWT + role) is kept in localStorage in the browser only. */
+/** Staff login for the admin and cashier pages. The session (JWT + role) is kept in sessionStorage in the browser only, so each tab has its own sign-in. */
 @Injectable({
   providedIn: 'root'
 })
@@ -55,9 +55,9 @@ export class AuthService {
     if (!this.isBrowser) return;
     try {
       if (session) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(session));
       } else {
-        localStorage.removeItem(STORAGE_KEY);
+        sessionStorage.removeItem(STORAGE_KEY);
       }
     } catch {
       // Storage unavailable (e.g. private mode) — the session still lasts for this visit.
@@ -67,7 +67,7 @@ export class AuthService {
   private load(): StaffSession | null {
     if (!this.isBrowser) return null;
     try {
-      const session = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') as StaffSession | null;
+      const session = JSON.parse(sessionStorage.getItem(STORAGE_KEY) ?? 'null') as StaffSession | null;
       return session && !isExpired(session) ? session : null;
     } catch {
       return null;
