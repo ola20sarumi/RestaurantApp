@@ -40,7 +40,7 @@ public class AuthController : ControllerBase
         // Same message for an unknown user and a wrong password, so usernames can't be probed.
         if (user == null || result == PasswordVerificationResult.Failed)
         {
-            return Unauthorized("Incorrect username or password.");
+            return Problem(detail: "Incorrect username or password.", statusCode: StatusCodes.Status401Unauthorized);
         }
 
         if (result == PasswordVerificationResult.SuccessRehashNeeded)

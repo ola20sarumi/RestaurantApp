@@ -53,7 +53,7 @@ public class ProductsController : ControllerBase
     {
         if (!await _context.Categories.AnyAsync(c => c.Id == request.CategoryId))
         {
-            return BadRequest($"Category {request.CategoryId} does not exist.");
+            return Problem(detail: $"Category {request.CategoryId} does not exist.", statusCode: StatusCodes.Status400BadRequest);
         }
 
         var product = new Product();
@@ -74,7 +74,7 @@ public class ProductsController : ControllerBase
 
         if (!await _context.Categories.AnyAsync(c => c.Id == request.CategoryId))
         {
-            return BadRequest($"Category {request.CategoryId} does not exist.");
+            return Problem(detail: $"Category {request.CategoryId} does not exist.", statusCode: StatusCodes.Status400BadRequest);
         }
 
         Apply(product, request);
@@ -94,7 +94,7 @@ public class ProductsController : ControllerBase
 
         if (await _context.OrderItems.AnyAsync(i => i.ProductId == id))
         {
-            return Conflict($"\"{product.Name}\" appears in past orders, so it can't be deleted. Mark it unavailable instead.");
+            return Problem(detail: $"\"{product.Name}\" appears in past orders, so it can't be deleted. Mark it unavailable instead.", statusCode: StatusCodes.Status409Conflict);
         }
 
         _context.Products.Remove(product);

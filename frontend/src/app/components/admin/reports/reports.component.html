@@ -1,0 +1,225 @@
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div>
+    <h1 class="h3 fw-bold mb-1"><i class="bi bi-graph-up me-2 text-brand"></i>Sales reports</h1>
+    @if (report(); as r) {
+      <p class="text-body-secondary mb-0">
+        @if (isSingleDay()) {
+          {{ r.from | date: 'fullDate' }}
+        } @else {
+          {{ r.from | date: 'mediumDate' }} – {{ r.to | date: 'mediumDate' }}
+        }
+      </p>
+    }
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary btn-sm" routerLink="/admin">
+      <i class="bi bi-pencil-square me-1"></i>Menu management
+    </a>
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="reload()" [disabled]="loading()">
+      <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+    </button>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card border-0 shadow-sm p-3 mb-4">
+  <div class="d-flex flex-wrap gap-2 mb-3" role="group" aria-label="Quick date filters">
+    @for (p of presets; track p.value) {
+      <button type="button" class="btn btn-sm" (click)="applyPreset(p.value)"
+              [class.btn-primary]="preset() === p.value" [class.btn-outline-secondary]="preset() !== p.value">
+        {{ p.label }}
+      </button>
+    }
+  </div>
+
+  <div class="row g-3 align-items-end">
+    <div class="col-sm-4 col-lg-3">
+      <label class="form-label small fw-semibold mb-1" for="reportMonth">Month</label>
+      <input id="reportMonth" type="month" class="form-control form-control-sm" name="month"
+             [(ngModel)]="month" (change)="applyMonth()">
+    </div>
+    <div class="col-sm-8 col-lg-6">
+      <form class="row g-2 align-items-end" (ngSubmit)="applyCustom()">
+        <div class="col">
+          <label class="form-label small fw-semibold mb-1" for="reportFrom">From</label>
+          <input id="reportFrom" type="date" class="form-control form-control-sm" name="from" [(ngModel)]="customFrom">
+        </div>
+        <div class="col">
+          <label class="form-label small fw-semibold mb-1" for="reportTo">To</label>
+          <input id="reportTo" type="date" class="form-control form-control-sm" name="to" [(ngModel)]="customTo">
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-sm btn-outline-primary">Apply</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+@if (error()) {
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error() }}</span>
+  </div>
+}
+
+@if (loading() && !report()) {
+  <div class="d-flex align-items-center gap-2 text-body-secondary py-5 justify-content-center">
+    <div class="spinner-border spinner-border-sm" role="status"></div>
+    <span>Loading report…</span>
+  </div>
+}
+
+@if (report(); as r) {
+  <div [class.opacity-50]="loading()">
+    <!-- Totals -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100 p-3 stat">
+          <div class="small text-body-secondary"><i class="bi bi-check-circle me-1 text-success"></i>Completed orders</div>
+          <div class="fs-3 fw-bold" data-testid="completed-orders">{{ r.completedOrders }}</div>
+          <div class="small text-body-secondary">Paid and served, picked up or delivered</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100 p-3 stat">
+          <div class="small text-body-secondary"><i class="bi bi-cash-coin me-1 text-brand"></i>Revenue</div>
+          <div class="fs-3 fw-bold" data-testid="revenue">{{ r.revenue | currency }}</div>
+          <div class="small text-body-secondary">Avg. {{ averageOrder() | currency }} per order</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100 p-3 stat">
+          <div class="small text-body-secondary"><i class="bi bi-x-circle me-1 text-danger"></i>Cancelled orders</div>
+          <div class="fs-3 fw-bold" data-testid="cancelled-orders">{{ r.cancelledOrders }}</div>
+          <div class="small text-body-secondary">Not counted in revenue</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100 p-3 stat">
+          <div class="small text-body-secondary"><i class="bi bi-basket me-1 text-brand"></i>Items sold</div>
+          <div class="fs-3 fw-bold" data-testid="items-sold">{{ r.itemsSold }}</div>
+          <div class="small text-body-secondary">In completed orders</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- By order type -->
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <h2 class="h6 fw-bold mb-3">By order type</h2>
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col">Type</th>
+                    <th scope="col" class="text-end">Completed</th>
+                    <th scope="col" class="text-end">Cancelled</th>
+                    <th scope="col" class="text-end">Revenue</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of r.byFulfillment; track row.fulfillmentType) {
+                    <tr>
+                      <td>
+                        <i class="bi {{ fulfillmentOption(row.fulfillmentType)?.icon }} me-1 text-brand"></i>
+                        {{ fulfillmentOption(row.fulfillmentType)?.label }}
+                      </td>
+                      <td class="text-end">
+                        {{ row.completedOrders }}
+                        <span class="small text-body-secondary d-none d-sm-inline">{{ completedLabel(row.fulfillmentType) }}</span>
+                      </td>
+                      <td class="text-end">{{ row.cancelledOrders }}</td>
+                      <td class="text-end">{{ row.revenue | currency }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products sold -->
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <h2 class="h6 fw-bold mb-3">Products sold</h2>
+            @if (r.products.length === 0) {
+              <p class="text-body-secondary mb-0">No completed orders in this period.</p>
+            } @else {
+              <div class="table-responsive products-table">
+                <table class="table table-sm align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th scope="col">Product</th>
+                      <th scope="col" class="text-end">Qty</th>
+                      <th scope="col" class="text-end">Revenue</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (product of r.products; track product.productId) {
+                      <tr>
+                        <td>{{ product.name }}</td>
+                        <td class="text-end">{{ product.quantity }}</td>
+                        <td class="text-end">{{ product.revenue | currency }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Per day (only useful for ranges longer than a day) -->
+      @if (!isSingleDay()) {
+        <div class="col-12">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body">
+              <h2 class="h6 fw-bold mb-3">Per day</h2>
+              <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th scope="col">Date</th>
+                      <th scope="col" class="text-end">Completed</th>
+                      <th scope="col" class="text-end">Cancelled</th>
+                      <th scope="col" class="text-end">Revenue</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (day of r.days; track day.date) {
+                      <tr [class.text-body-secondary]="day.completedOrders === 0 && day.cancelledOrders === 0">
+                        <td>{{ day.date | date: 'EEE d MMM' }}</td>
+                        <td class="text-end">{{ day.completedOrders }}</td>
+                        <td class="text-end">{{ day.cancelledOrders }}</td>
+                        <td class="text-end">{{ day.revenue | currency }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                  <tfoot>
+                    <tr class="fw-bold">
+                      <td>Total</td>
+                      <td class="text-end">{{ r.completedOrders }}</td>
+                      <td class="text-end">{{ r.cancelledOrders }}</td>
+                      <td class="text-end">{{ r.revenue | currency }}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <p class="small text-body-secondary mt-3 mb-0">
+      Orders are counted on the day they were placed. Pending, preparing and ready orders aren't included until they're
+      completed or cancelled.
+    </p>
+  </div>
+}

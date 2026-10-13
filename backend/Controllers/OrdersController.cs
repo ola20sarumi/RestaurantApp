@@ -32,7 +32,7 @@ public class OrdersController : ControllerBase
         var missing = productIds.Where(id => !products.ContainsKey(id)).ToList();
         if (missing.Count > 0)
         {
-            return BadRequest($"Products not found or unavailable: {string.Join(", ", missing)}");
+            return Problem(detail: $"Products not found or unavailable: {string.Join(", ", missing)}", statusCode: StatusCodes.Status400BadRequest);
         }
 
         var isDineIn = request.FulfillmentType == CreateOrderRequest.DineIn;
@@ -93,6 +93,97 @@ public class OrdersController : ControllerBase
         return await query.OrderByDescending(o => o.OrderDate).ToListAsync();
     }
 
+    // Admin: sales report for finished orders placed between `from` and `to` (inclusive calendar days, default today).
+    // `timeZone` is an IANA id such as "Europe/Oslo" (the browser's), so days start at local midnight; OrderDate is UTC.
+    [HttpGet("report")]
+    [Authorize(Roles = Roles.Admin)]
+    public async Task<ActionResult<OrderReport>> GetReport(
+        [FromQuery] DateOnly? from, [FromQuery] DateOnly? to, [FromQuery] string? timeZone)
+    {
+        TimeZoneInfo zone;
+        try
+        {
+            zone = string.IsNullOrWhiteSpace(timeZone) ? TimeZoneInfo.Utc : TimeZoneInfo.FindSystemTimeZoneById(timeZone);
+        }
+        catch (TimeZoneNotFoundException)
+        {
+            return Problem(detail: $"Unknown time zone \"{timeZone}\".", statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zone));
+        var firstDay = from ?? to ?? today;
+        var lastDay = to ?? from ?? today;
+        if (lastDay < firstDay)
+        {
+            return Problem(detail: "The end date must be on or after the start date.", statusCode: StatusCodes.Status400BadRequest);
+        }
+        if (lastDay.DayNumber - firstDay.DayNumber >= MaxReportDays)
+        {
+            return Problem(detail: $"Pick a range of at most {MaxReportDays} days.", statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        var startUtc = LocalMidnightToUtc(firstDay, zone);
+        var endUtc = LocalMidnightToUtc(lastDay.AddDays(1), zone);
+
+        var orders = await _context.Orders
+            .Where(o => o.OrderDate >= startUtc && o.OrderDate < endUtc
+                        && (o.Status == "Completed" || o.Status == "Cancelled"))
+            .Select(o => new { o.OrderDate, o.Status, o.FulfillmentType, o.TotalAmount })
+            .ToListAsync();
+
+        var products = await _context.OrderItems
+            .Where(i => i.Order.OrderDate >= startUtc && i.Order.OrderDate < endUtc && i.Order.Status == "Completed")
+            .GroupBy(i => new { i.ProductId, i.Product.Name })
+            .Select(g => new ProductSales(g.Key.ProductId, g.Key.Name, g.Sum(i => i.Quantity), g.Sum(i => i.UnitPrice * i.Quantity)))
+            .ToListAsync();
+
+        var completed = orders.Where(o => o.Status == "Completed").ToList();
+
+        var byFulfillment = new[] { CreateOrderRequest.DineIn, CreateOrderRequest.Takeout, CreateOrderRequest.Delivery }
+            .Select(type => new FulfillmentSummary(
+                type,
+                completed.Count(o => o.FulfillmentType == type),
+                orders.Count(o => o.Status == "Cancelled" && o.FulfillmentType == type),
+                completed.Where(o => o.FulfillmentType == type).Sum(o => o.TotalAmount)))
+            .ToList();
+
+        var byDay = orders.ToLookup(o => DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(o.OrderDate, zone)));
+        var days = Enumerable.Range(0, lastDay.DayNumber - firstDay.DayNumber + 1)
+            .Select(offset =>
+            {
+                var day = firstDay.AddDays(offset);
+                var dayOrders = byDay[day].ToList();
+                return new DaySummary(
+                    day,
+                    dayOrders.Count(o => o.Status == "Completed"),
+                    dayOrders.Count(o => o.Status == "Cancelled"),
+                    dayOrders.Where(o => o.Status == "Completed").Sum(o => o.TotalAmount));
+            })
+            .ToList();
+
+        return new OrderReport(
+            firstDay,
+            lastDay,
+            completed.Count,
+            orders.Count - completed.Count,
+            completed.Sum(o => o.TotalAmount),
+            products.Sum(p => p.Quantity),
+            byFulfillment,
+            days,
+            products.OrderByDescending(p => p.Quantity).ThenBy(p => p.Name).ToList());
+    }
+
+    private const int MaxReportDays = 366;
+
+    // OrderDate is stored as UTC (DateTime.UtcNow), so day boundaries are converted from the requested time zone.
+    private static DateTime LocalMidnightToUtc(DateOnly day, TimeZoneInfo zone)
+    {
+        var local = day.ToDateTime(TimeOnly.MinValue, DateTimeKind.Unspecified);
+        // A midnight skipped by a DST change doesn't exist locally; the first valid time is an hour later.
+        if (zone.IsInvalidTime(local)) local = local.AddHours(1);
+        return TimeZoneInfo.ConvertTimeToUtc(local, zone);
+    }
+
     // Cashier: Update status (e.g., mark as "Completed")
     [HttpPut("{id}/status")]
     [Authorize(Roles = Roles.Staff)]
@@ -100,7 +191,7 @@ public class OrdersController : ControllerBase
     {
         if (!AllowedStatuses.Contains(status))
         {
-            return BadRequest($"Status must be one of: {string.Join(", ", AllowedStatuses)}");
+            return Problem(detail: $"Status must be one of: {string.Join(", ", AllowedStatuses)}", statusCode: StatusCodes.Status400BadRequest);
         }
 
         var order = await _context.Orders.FindAsync(id);

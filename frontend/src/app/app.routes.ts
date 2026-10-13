@@ -4,6 +4,7 @@ import { CartComponent } from './components/customer/cart/cart.component';
 import { CheckoutComponent } from './components/customer/checkout/checkout.component';
 import { DashboardComponent } from './components/cashier/dashboard/dashboard.component';
 import { MenuAdminComponent } from './components/admin/menu-admin/menu-admin.component';
+import { ReportsComponent } from './components/admin/reports/reports.component';
 import { LoginComponent } from './components/auth/login/login.component';
 import { staffGuard } from './services/auth.guard';
 
@@ -16,5 +17,6 @@ export const routes: Routes = [
   // Staff pages: admins can open both, cashiers only the cashier page.
   { path: 'cashier', component: DashboardComponent, canActivate: [staffGuard], data: { roles: ['Admin', 'Cashier'] } },
   { path: 'admin', component: MenuAdminComponent, canActivate: [staffGuard], data: { roles: ['Admin'] } },
+  { path: 'admin/reports', component: ReportsComponent, canActivate: [staffGuard], data: { roles: ['Admin'] } },
   { path: '**', redirectTo: 'menu' }
 ];

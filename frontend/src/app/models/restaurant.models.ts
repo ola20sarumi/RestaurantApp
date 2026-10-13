@@ -97,3 +97,17 @@ export interface StaffSession {
   role: StaffRole;
   expiresAt: string; // ISO date (UTC)
 }
+
+// GET /api/orders/report (admins): finished orders placed between `from` and `to` (inclusive, yyyy-MM-dd).
+// Revenue, items sold and products count completed orders only.
+export interface OrderReport {
+  from: string;
+  to: string;
+  completedOrders: number;
+  cancelledOrders: number;
+  revenue: number;
+  itemsSold: number;
+  byFulfillment: { fulfillmentType: FulfillmentType; completedOrders: number; cancelledOrders: number; revenue: number }[];
+  days: { date: string; completedOrders: number; cancelledOrders: number; revenue: number }[];
+  products: { productId: number; name: string; quantity: number; revenue: number }[];
+}

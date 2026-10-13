@@ -8,6 +8,10 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client
   },
   {
+    path: 'admin/reports',
+    renderMode: RenderMode.Client
+  },
+  {
     path: 'cashier',
     renderMode: RenderMode.Client
   },

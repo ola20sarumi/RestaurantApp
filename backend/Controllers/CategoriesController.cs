@@ -32,7 +32,7 @@ public class CategoriesController : ControllerBase
         var name = request.Name.Trim();
         if (await _context.Categories.AnyAsync(c => c.Name == name))
         {
-            return Conflict($"A category named \"{name}\" already exists.");
+            return Problem(detail: $"A category named \"{name}\" already exists.", statusCode: StatusCodes.Status409Conflict);
         }
 
         var category = new Category { Name = name, Description = Clean(request.Description) };
@@ -53,7 +53,7 @@ public class CategoriesController : ControllerBase
         var name = request.Name.Trim();
         if (await _context.Categories.AnyAsync(c => c.Id != id && c.Name == name))
         {
-            return Conflict($"A category named \"{name}\" already exists.");
+            return Problem(detail: $"A category named \"{name}\" already exists.", statusCode: StatusCodes.Status409Conflict);
         }
 
         category.Name = name;
@@ -73,7 +73,7 @@ public class CategoriesController : ControllerBase
 
         if (await _context.Products.AnyAsync(p => p.CategoryId == id))
         {
-            return Conflict($"\"{category.Name}\" still has products. Move or delete them first.");
+            return Problem(detail: $"\"{category.Name}\" still has products. Move or delete them first.", statusCode: StatusCodes.Status409Conflict);
         }
 
         _context.Categories.Remove(category);

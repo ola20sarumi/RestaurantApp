@@ -1,0 +1,13 @@
+.stat .fs-3 {
+  line-height: 1.2;
+}
+
+/* Long menus scroll inside the card instead of stretching the page. */
+.products-table {
+  max-height: 22rem;
+  overflow-y: auto;
+}
+
+tfoot td {
+  border-bottom: 0;
+}

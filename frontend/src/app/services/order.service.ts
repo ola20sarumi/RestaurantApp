@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { API_BASE_URL } from '../api.config';
-import { CreateOrderRequest, Order } from '../models/restaurant.models';
+import { CreateOrderRequest, Order, OrderReport } from '../models/restaurant.models';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +16,15 @@ export class OrderService {
   getOrders(status?: string): Observable<Order[]> {
     const params = status ? new HttpParams().set('status', status) : undefined;
     return this.http.get<Order[]>(this.url, { params });
+  }
+
+  /** Sales report (admins only) for orders placed from `from` to `to` (yyyy-MM-dd, inclusive) in the browser's time zone. */
+  getReport(from: string, to: string): Observable<OrderReport> {
+    const params = new HttpParams()
+      .set('from', from)
+      .set('to', to)
+      .set('timeZone', Intl.DateTimeFormat().resolvedOptions().timeZone);
+    return this.http.get<OrderReport>(`${this.url}/report`, { params });
   }
 
   getOrder(id: number): Observable<Order> {
