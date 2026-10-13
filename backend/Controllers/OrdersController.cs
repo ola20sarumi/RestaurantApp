@@ -1,6 +1,7 @@
 using backend.Data;
 using backend.Dtos;
 using backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -59,8 +60,9 @@ public class OrdersController : ControllerBase
         return CreatedAtAction(nameof(GetOrderById), new { id = order.Id }, order);
     }
 
-    // Customer / Cashier: Get specific order details
+    // Cashier: Get specific order details (staff only, since orders hold customer names, phones and addresses)
     [HttpGet("{id}")]
+    [Authorize(Roles = Roles.Staff)]
     public async Task<ActionResult<Order>> GetOrderById(int id)
     {
         var order = await _context.Orders
@@ -75,6 +77,7 @@ public class OrdersController : ControllerBase
 
     // Cashier: Get all orders (with optional status filter)
     [HttpGet]
+    [Authorize(Roles = Roles.Staff)]
     public async Task<ActionResult<IEnumerable<Order>>> GetOrders([FromQuery] string? status)
     {
         var query = _context.Orders
@@ -92,6 +95,7 @@ public class OrdersController : ControllerBase
 
     // Cashier: Update status (e.g., mark as "Completed")
     [HttpPut("{id}/status")]
+    [Authorize(Roles = Roles.Staff)]
     public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] string status)
     {
         if (!AllowedStatuses.Contains(status))

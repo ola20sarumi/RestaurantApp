@@ -1,0 +1,272 @@
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <h1 class="h3 fw-bold mb-0"><i class="bi bi-pencil-square me-2 text-brand"></i>Menu management</h1>
+
+  <ul class="nav nav-pills gap-1">
+    <li class="nav-item">
+      <button type="button" class="nav-link" [class.active]="tab() === 'products'" (click)="selectTab('products')">
+        <i class="bi bi-egg-fried me-1"></i>Products <span class="badge text-bg-light ms-1">{{ products().length }}</span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button type="button" class="nav-link" [class.active]="tab() === 'categories'" (click)="selectTab('categories')">
+        <i class="bi bi-tags me-1"></i>Categories <span class="badge text-bg-light ms-1">{{ categories().length }}</span>
+      </button>
+    </li>
+  </ul>
+</div>
+
+@if (error()) {
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ error() }}</span>
+  </div>
+}
+@if (notice()) {
+  <div class="alert alert-success d-flex align-items-center gap-2" role="status">
+    <i class="bi bi-check-circle-fill"></i>
+    <span>{{ notice() }}</span>
+  </div>
+}
+
+@if (loading()) {
+  <div class="d-flex align-items-center gap-2 text-body-secondary py-5 justify-content-center">
+    <div class="spinner-border spinner-border-sm" role="status"></div>
+    <span>Loading menu…</span>
+  </div>
+} @else if (tab() === 'products') {
+  <div class="row g-4">
+    <!-- Product form (shown above the table on small screens) -->
+    @if (productDraft(); as draft) {
+      <div class="col-lg-4 order-lg-2">
+        <div class="card border-0 shadow-sm p-4 sticky-lg-top form-card">
+          <h2 class="h5 mb-3">{{ draft.id === null ? 'Add product' : 'Edit product' }}</h2>
+
+          @if (categories().length === 0) {
+            <p class="text-body-secondary mb-0">Add a category first, then you can add products to it.</p>
+          } @else {
+            <form #productForm="ngForm" (ngSubmit)="saveProduct(productForm)" novalidate>
+              <div class="mb-3">
+                <label class="form-label fw-semibold" for="productName">Name *</label>
+                <input id="productName" type="text" class="form-control" name="name"
+                       [(ngModel)]="draft.name" #nameField="ngModel" required maxlength="100"
+                       [class.is-invalid]="nameField.invalid && (nameField.touched || productForm.submitted)">
+                <div class="invalid-feedback">Please enter a name.</div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-semibold" for="productCategory">Category *</label>
+                <select id="productCategory" class="form-select" name="categoryId"
+                        [(ngModel)]="draft.categoryId" required>
+                  @for (category of categories(); track category.id) {
+                    <option [ngValue]="category.id">{{ category.name }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-semibold" for="productPrice">Price *</label>
+                <div class="input-group has-validation">
+                  <span class="input-group-text">$</span>
+                  <input id="productPrice" type="number" class="form-control" name="price"
+                         [(ngModel)]="draft.price" #priceField="ngModel" required min="0.01" max="10000" step="0.01"
+                         [class.is-invalid]="priceField.invalid && (priceField.touched || productForm.submitted)">
+                  <div class="invalid-feedback">Enter a price between $0.01 and $10,000.</div>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-semibold" for="productDescription">Description</label>
+                <textarea id="productDescription" class="form-control" name="description" rows="3"
+                          [(ngModel)]="draft.description" maxlength="500"></textarea>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-semibold" for="productImage">Image URL</label>
+                <input id="productImage" type="url" class="form-control" name="imageUrl"
+                       [(ngModel)]="draft.imageUrl" #imageField="ngModel" maxlength="500" pattern="https?://.+"
+                       placeholder="https://…"
+                       [class.is-invalid]="imageField.invalid && (imageField.touched || productForm.submitted)">
+                <div class="invalid-feedback">Enter a URL starting with http:// or https://.</div>
+                @if (draft.imageUrl && imageField.valid) {
+                  <img [src]="draft.imageUrl" alt="Preview" class="preview rounded mt-2">
+                }
+              </div>
+
+              <div class="form-check form-switch mb-4">
+                <input id="productAvailable" type="checkbox" class="form-check-input" role="switch" name="isAvailable"
+                       [(ngModel)]="draft.isAvailable">
+                <label class="form-check-label" for="productAvailable">Available on the menu</label>
+              </div>
+
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1" [disabled]="saving()">
+                  @if (saving()) {
+                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                  }
+                  {{ draft.id === null ? 'Add product' : 'Save changes' }}
+                </button>
+                <button type="button" class="btn btn-outline-secondary" (click)="productDraft.set(null)">Cancel</button>
+              </div>
+            </form>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Product table -->
+    <div [class]="productDraft() ? 'col-lg-8 order-lg-1' : 'col-12'">
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        <input type="search" class="form-control form-control-sm search" placeholder="Search products…"
+               aria-label="Search products" [value]="search()" (input)="search.set($any($event.target).value)">
+        <select class="form-select form-select-sm filter" aria-label="Filter by category"
+                (change)="categoryFilter.set(+$any($event.target).value)">
+          <option value="0" [selected]="categoryFilter() === 0">All categories</option>
+          @for (category of categories(); track category.id) {
+            <option [value]="category.id" [selected]="categoryFilter() === category.id">{{ category.name }}</option>
+          }
+        </select>
+        <button type="button" class="btn btn-sm btn-primary ms-auto text-nowrap" (click)="newProduct()">
+          <i class="bi bi-plus-lg me-1"></i>Add product
+        </button>
+      </div>
+
+      <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Product</th>
+                <th scope="col" class="d-none d-md-table-cell">Category</th>
+                <th scope="col" class="text-end">Price</th>
+                <th scope="col" class="text-center">Available</th>
+                <th scope="col" class="text-end"><span class="visually-hidden">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (product of filteredProducts(); track product.id) {
+                <tr [class.table-active]="productDraft()?.id === product.id" [class.unavailable]="!product.isAvailable">
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      @if (product.imageUrl) {
+                        <img [src]="product.imageUrl" alt="" class="thumb rounded" loading="lazy">
+                      } @else {
+                        <div class="thumb rounded bg-body-secondary d-flex align-items-center justify-content-center">
+                          <i class="bi bi-image text-body-secondary"></i>
+                        </div>
+                      }
+                      <div>
+                        <div class="fw-semibold">{{ product.name }}</div>
+                        <div class="small text-body-secondary d-md-none">{{ categoryNames().get(product.categoryId) }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="d-none d-md-table-cell">{{ categoryNames().get(product.categoryId) }}</td>
+                  <td class="text-end">{{ product.price | currency }}</td>
+                  <td class="text-center">
+                    <div class="form-check form-switch d-inline-block mb-0">
+                      <input type="checkbox" class="form-check-input" role="switch"
+                             [attr.aria-label]="'Available: ' + product.name"
+                             [checked]="product.isAvailable" [disabled]="busyId() === product.id"
+                             (change)="toggleAvailable(product)">
+                    </div>
+                  </td>
+                  <td class="text-end text-nowrap">
+                    <button type="button" class="btn btn-sm btn-outline-secondary me-1" title="Edit"
+                            [attr.aria-label]="'Edit ' + product.name" (click)="editProduct(product)">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                            [attr.aria-label]="'Delete ' + product.name" [disabled]="busyId() === product.id"
+                            (click)="deleteProduct(product)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="text-center text-body-secondary py-5">
+                    <i class="bi bi-inbox display-6 d-block mb-2"></i>
+                    {{ products().length ? 'No products match your filters.' : 'No products yet.' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="row g-4">
+    @if (categoryDraft(); as draft) {
+      <div class="col-lg-4 order-lg-2">
+        <div class="card border-0 shadow-sm p-4 sticky-lg-top form-card">
+          <h2 class="h5 mb-3">{{ draft.id === null ? 'Add category' : 'Edit category' }}</h2>
+          <form #categoryForm="ngForm" (ngSubmit)="saveCategory(categoryForm)" novalidate>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="categoryName">Name *</label>
+              <input id="categoryName" type="text" class="form-control" name="name"
+                     [(ngModel)]="draft.name" #catNameField="ngModel" required maxlength="100"
+                     [class.is-invalid]="catNameField.invalid && (catNameField.touched || categoryForm.submitted)">
+              <div class="invalid-feedback">Please enter a name.</div>
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-semibold" for="categoryDescription">Description</label>
+              <textarea id="categoryDescription" class="form-control" name="description" rows="2"
+                        [(ngModel)]="draft.description" maxlength="300"></textarea>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary flex-grow-1" [disabled]="saving()">
+                @if (saving()) {
+                  <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                }
+                {{ draft.id === null ? 'Add category' : 'Save changes' }}
+              </button>
+              <button type="button" class="btn btn-outline-secondary" (click)="categoryDraft.set(null)">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
+
+    <div [class]="categoryDraft() ? 'col-lg-8 order-lg-1' : 'col-12'">
+      <div class="d-flex mb-3">
+        <button type="button" class="btn btn-sm btn-primary ms-auto" (click)="newCategory()">
+          <i class="bi bi-plus-lg me-1"></i>Add category
+        </button>
+      </div>
+
+      <div class="list-group shadow-sm">
+        @for (category of categories(); track category.id) {
+          <div class="list-group-item d-flex align-items-center gap-3 py-3" [class.active-row]="categoryDraft()?.id === category.id">
+            <div class="flex-grow-1">
+              <div class="fw-semibold">{{ category.name }}</div>
+              @if (category.description) {
+                <div class="small text-body-secondary">{{ category.description }}</div>
+              }
+            </div>
+            <span class="badge rounded-pill text-bg-light text-nowrap">
+              {{ productCounts().get(category.id) ?? 0 }} product{{ productCounts().get(category.id) === 1 ? '' : 's' }}
+            </span>
+            <div class="text-nowrap">
+              <button type="button" class="btn btn-sm btn-outline-secondary me-1" title="Edit"
+                      [attr.aria-label]="'Edit ' + category.name" (click)="editCategory(category)">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                      [attr.aria-label]="'Delete ' + category.name" [disabled]="busyId() === category.id"
+                      (click)="deleteCategory(category)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <div class="list-group-item text-center text-body-secondary py-5">
+            <i class="bi bi-tags display-6 d-block mb-2"></i>
+            No categories yet. Add one to start building the menu.
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

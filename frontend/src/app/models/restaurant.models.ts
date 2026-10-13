@@ -67,3 +67,33 @@ export interface CartItem {
 }
 
 export const ORDER_STATUSES = ['Pending', 'Preparing', 'Ready', 'Completed', 'Cancelled'] as const;
+
+// Bodies for the admin endpoints (POST/PUT /api/categories and /api/products).
+export interface CategoryRequest {
+  name: string;
+  description: string | null;
+}
+
+export interface ProductRequest {
+  name: string;
+  description: string | null;
+  price: number;
+  imageUrl: string | null;
+  isAvailable: boolean;
+  categoryId: number;
+}
+
+// Staff login (POST /api/auth/login). Admins can use the admin and cashier pages; cashiers only the cashier page.
+export type StaffRole = 'Admin' | 'Cashier';
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface StaffSession {
+  token: string;
+  username: string;
+  role: StaffRole;
+  expiresAt: string; // ISO date (UTC)
+}

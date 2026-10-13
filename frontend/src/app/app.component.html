@@ -19,11 +19,31 @@
           }
         </a>
       </li>
-      <li class="nav-item ms-sm-2">
-        <a class="btn btn-sm btn-outline-secondary" routerLink="/cashier" routerLinkActive="active">
-          <i class="bi bi-person-badge me-1"></i><span class="d-none d-sm-inline">Cashier</span>
-        </a>
-      </li>
+      @if (auth.session(); as session) {
+        @if (session.role === 'Admin') {
+          <li class="nav-item ms-sm-2">
+            <a class="btn btn-sm btn-outline-secondary" routerLink="/admin" routerLinkActive="active">
+              <i class="bi bi-pencil-square me-1"></i><span class="d-none d-sm-inline">Admin</span>
+            </a>
+          </li>
+        }
+        <li class="nav-item" [class.ms-sm-2]="session.role !== 'Admin'">
+          <a class="btn btn-sm btn-outline-secondary" routerLink="/cashier" routerLinkActive="active">
+            <i class="bi bi-person-badge me-1"></i><span class="d-none d-sm-inline">Cashier</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="btn btn-sm btn-link" (click)="logout()" [title]="'Signed in as ' + session.username">
+            <i class="bi bi-box-arrow-right me-1"></i><span class="d-none d-sm-inline">Sign out</span>
+          </button>
+        </li>
+      } @else {
+        <li class="nav-item ms-sm-2">
+          <a class="btn btn-sm btn-outline-secondary" routerLink="/login" routerLinkActive="active">
+            <i class="bi bi-person-lock me-1"></i><span class="d-none d-sm-inline">Staff</span>
+          </a>
+        </li>
+      }
     </ul>
   </div>
 </nav>

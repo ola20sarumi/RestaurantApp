@@ -7,6 +7,7 @@ import { RouterLink } from '@angular/router';
 import { CustomerDetails, FULFILLMENT_OPTIONS, FulfillmentType, Order } from '../../../models/restaurant.models';
 import { CartService } from '../../../services/cart.service';
 import { OrderService } from '../../../services/order.service';
+import { describeApiError } from '../../../services/api-error';
 
 @Component({
   selector: 'app-checkout',
@@ -66,24 +67,9 @@ export class CheckoutComponent {
         this.isSubmitting.set(false);
       },
       error: (err: HttpErrorResponse) => {
-        this.error.set(this.describeError(err));
+        this.error.set(describeApiError(err, 'Could not place your order. Please try again.'));
         this.isSubmitting.set(false);
       }
     });
-  }
-
-  /** Turns an API error into a message for the customer. */
-  private describeError(err: HttpErrorResponse): string {
-    if (err.status === 0) {
-      return 'Could not reach the restaurant. Please check your connection and try again.';
-    }
-    if (typeof err.error === 'string') {
-      return err.error; // e.g. "Products not found or unavailable: 3"
-    }
-    const fieldErrors = err.error?.errors as Record<string, string[]> | undefined;
-    if (fieldErrors) {
-      return Object.values(fieldErrors).flat().join(' ');
-    }
-    return 'Could not place your order. Please try again.';
   }
 }

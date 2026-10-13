@@ -1,0 +1,54 @@
+.nav-pills .nav-link {
+  color: var(--bs-body-color);
+}
+
+.nav-pills .nav-link.active {
+  background-color: var(--brand);
+  color: #fff;
+}
+
+.form-card {
+  top: 5rem; /* clear the sticky navbar */
+  z-index: 1;
+}
+
+.search {
+  max-width: 240px;
+}
+
+.filter {
+  width: auto;
+  min-width: 170px;
+}
+
+.thumb {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.preview {
+  display: block;
+  width: 100%;
+  max-height: 160px;
+  object-fit: cover;
+}
+
+tr.unavailable .thumb,
+tr.unavailable .fw-semibold {
+  opacity: 0.55;
+}
+
+.active-row {
+  background-color: var(--brand-soft);
+}
+
+.form-check-input:checked {
+  background-color: var(--brand);
+  border-color: var(--brand);
+}
+
+.table {
+  --bs-table-bg: #fff; /* Bootstrap tables default to the (beige) body background */
+}

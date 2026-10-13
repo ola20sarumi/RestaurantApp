@@ -1,0 +1,44 @@
+import { expect, test } from '@playwright/test';
+
+import { createOrderViaApi, gotoApp, loginAs, uniqueName } from './helpers';
+
+test.describe('Cashier dashboard', () => {
+  test.beforeEach(async ({ page, request }) => {
+    await loginAs(page, request, 'cashier');
+  });
+
+  test('shows a new order and moves it through the statuses', async ({ page, request }) => {
+    const customer = uniqueName('Cashier');
+    const order = await createOrderViaApi(request, customer);
+
+    await gotoApp(page, '/cashier');
+    const card = page.locator('.card').filter({ has: page.getByText(`#${order.id}`, { exact: true }) });
+    const status = card.locator('.card-header .badge');
+    await expect(card).toContainText(customer);
+    await expect(status).toHaveText('Pending');
+    await expect(card.getByRole('button', { name: 'Pending' })).toBeDisabled();
+
+    await card.getByRole('button', { name: 'Preparing' }).click();
+    await expect(status).toHaveText('Preparing');
+
+    await card.getByRole('button', { name: 'Ready' }).click();
+    await expect(status).toHaveText('Ready');
+  });
+
+  test('filters orders by status', async ({ page, request }) => {
+    const order = await createOrderViaApi(request, uniqueName('Filter'));
+
+    await gotoApp(page, '/cashier');
+    const filter = page.getByLabel('Filter by status');
+    const card = page.locator('.card').filter({ has: page.getByText(`#${order.id}`, { exact: true }) });
+
+    await filter.selectOption('Pending');
+    await expect(card).toBeVisible();
+    for (const badge of await page.locator('.card-header .badge.rounded-pill').all()) {
+      await expect(badge).toHaveText('Pending');
+    }
+
+    await filter.selectOption('Completed');
+    await expect(card).toHaveCount(0);
+  });
+});

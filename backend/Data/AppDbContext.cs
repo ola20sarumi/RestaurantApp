@@ -11,6 +11,7 @@ public class AppDbContext : DbContext
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+    public DbSet<User> Users => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -26,6 +27,13 @@ public class AppDbContext : DbContext
             order.Property(o => o.CustomerPhone).HasMaxLength(30);
             order.Property(o => o.FulfillmentType).HasMaxLength(20).HasDefaultValue("Takeout");
             order.Property(o => o.DeliveryAddress).HasMaxLength(300);
+        });
+
+        modelBuilder.Entity<User>(user =>
+        {
+            user.HasIndex(u => u.Username).IsUnique();
+            user.Property(u => u.Username).HasMaxLength(50);
+            user.Property(u => u.Role).HasMaxLength(20);
         });
     }
 }
