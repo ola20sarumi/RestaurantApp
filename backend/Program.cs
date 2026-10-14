@@ -54,11 +54,21 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.AddOpenApi();
 
-// 3. Configure CORS to allow requests from Angular frontend
+// 3. CORS: only the Angular frontend's origins (Cors:AllowedOrigins) may call the API from a browser.
+// Server-to-server calls (SSR, the Paystack webhook) don't use CORS, so they aren't affected.
+var allowedOrigins = (builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [])
+    .Select(origin => origin.Trim().TrimEnd('/')) // "https://x.com/" would never match the Origin header
+    .Where(origin => origin.Length > 0)
+    .ToArray();
+if (allowedOrigins.Length == 0)
+{
+    throw new InvalidOperationException(
+        "Cors:AllowedOrigins must list the frontend's origin, e.g. Cors__AllowedOrigins__0=https://restaurant.example.com.");
+}
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp",
-        policy => policy.AllowAnyOrigin()
+        policy => policy.WithOrigins(allowedOrigins)
                         .AllowAnyMethod()
                         .AllowAnyHeader());
 });
