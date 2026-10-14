@@ -37,15 +37,25 @@ export const FULFILLMENT_OPTIONS: { value: FulfillmentType; label: string; icon:
   { value: 'Delivery', label: 'Delivery', icon: 'bi-truck', hint: 'We bring it to your door' }
 ];
 
+/** "Online" = Paystack before the kitchen sees the order; "Counter" = cash/POS in person. Delivery is always Online. */
+export type PaymentMethod = 'Online' | 'Counter';
+export type PaymentStatus = 'Unpaid' | 'Paid';
+
 export interface Order {
   id: number;
+  reference: string;          // unguessable id for the customer's /order/:reference page
   orderDate: string;
   totalAmount: number;
   status: string;
   customerName: string;
   customerPhone: string;
+  customerEmail: string | null;
   fulfillmentType: FulfillmentType;
   deliveryAddress: string | null;
+  paymentMethod: PaymentMethod;
+  paymentStatus: PaymentStatus;
+  paidAt: string | null;      // UTC
+  paystackReference: string | null;
   items: OrderItem[];
 }
 
@@ -53,9 +63,25 @@ export interface Order {
 export interface CreateOrderRequest {
   fulfillmentType: FulfillmentType;
   customerName: string;      // required for every order type
-  customerPhone?: string;    // takeout and delivery only
+  customerPhone?: string;    // takeout and delivery; eat-in only when paying online by phone
   deliveryAddress?: string;  // delivery only
+  paymentMethod: PaymentMethod;
+  customerEmail?: string;    // online payment: email or phone is required (Paystack emails the receipt)
   items: { productId: number; quantity: number }[];
+}
+
+/** GET /api/orders/track/:reference — the customer's view of their order (no contact details). */
+export interface OrderTracking {
+  id: number;
+  reference: string;
+  orderDate: string;
+  status: string;
+  fulfillmentType: FulfillmentType;
+  customerName: string;
+  totalAmount: number;
+  paymentMethod: PaymentMethod;
+  paymentStatus: PaymentStatus;
+  items: { name: string; quantity: number; unitPrice: number }[];
 }
 
 /** Customer details entered on the checkout page. */

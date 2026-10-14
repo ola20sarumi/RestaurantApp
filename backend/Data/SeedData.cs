@@ -57,9 +57,9 @@ public static class SeedData
             Description = "Starters to begin your meal",
             Products =
             [
-                Item("Crispy Mozzarella Sticks", "Golden fried mozzarella served with warm marinara sauce.", 8.99m, "photo-1531749668029-2db88e4276c7"),
-                Item("Garlic Herb Bread", "Toasted artisan bread topped with garlic butter and fresh parsley.", 5.50m, "photo-1556008531-57e6eefc7be4"),
-                Item("Buffalo Chicken Wings", "8 crispy wings tossed in spicy buffalo sauce with ranch dip.", 11.99m, "photo-1567620832903-9fc6debc209f")
+                Item("Crispy Mozzarella Sticks", "Golden fried mozzarella served with warm marinara sauce.", 3500m, "photo-1531749668029-2db88e4276c7"),
+                Item("Garlic Herb Bread", "Toasted artisan bread topped with garlic butter and fresh parsley.", 2000m, "photo-1556008531-57e6eefc7be4"),
+                Item("Buffalo Chicken Wings", "8 crispy wings tossed in spicy buffalo sauce with ranch dip.", 5500m, "photo-1567620832903-9fc6debc209f")
             ]
         },
         new Category
@@ -68,10 +68,10 @@ public static class SeedData
             Description = "Hearty and delicious entrees",
             Products =
             [
-                Item("Classic Cheeseburger", "Angus beef patty, cheddar, lettuce, tomato, and special sauce on brioche.", 13.99m, "photo-1568901346375-23c9450c58cd"),
-                Item("Margherita Pizza", "Fresh mozzarella, San Marzano tomato sauce, and basil on crispy crust.", 14.50m, "photo-1604382354936-07c5d9983bd3"),
-                Item("Fettuccine Alfredo", "Creamy parmesan sauce tossed with fresh fettuccine pasta.", 12.99m, "photo-1645112411341-6c4fd023714a"),
-                Item("Grilled Salmon Bowl", "Wild-caught salmon with quinoa, roasted veggies, and lemon tahini.", 17.50m, "photo-1546069901-ba9599a7e63c")
+                Item("Classic Cheeseburger", "Angus beef patty, cheddar, lettuce, tomato, and special sauce on brioche.", 6500m, "photo-1568901346375-23c9450c58cd"),
+                Item("Margherita Pizza", "Fresh mozzarella, San Marzano tomato sauce, and basil on crispy crust.", 8000m, "photo-1604382354936-07c5d9983bd3"),
+                Item("Fettuccine Alfredo", "Creamy parmesan sauce tossed with fresh fettuccine pasta.", 7000m, "photo-1645112411341-6c4fd023714a"),
+                Item("Grilled Salmon Bowl", "Wild-caught salmon with quinoa, roasted veggies, and lemon tahini.", 12000m, "photo-1546069901-ba9599a7e63c")
             ]
         },
         new Category
@@ -80,9 +80,9 @@ public static class SeedData
             Description = "Sweet treats and refreshing beverages",
             Products =
             [
-                Item("Chocolate Lava Cake", "Warm chocolate cake with a molten center, served with vanilla ice cream.", 7.99m, "photo-1606313564200-e75d5e30476c"),
-                Item("New York Cheesecake", "Classic creamy cheesecake with strawberry drizzle.", 6.99m, "photo-1533134242443-d4fd215305ad"),
-                Item("Fresh Iced Lemonade", "House-made freshly squeezed lemonade over ice.", 3.50m, "photo-1513558161293-cdaf765ed2fd")
+                Item("Chocolate Lava Cake", "Warm chocolate cake with a molten center, served with vanilla ice cream.", 3500m, "photo-1606313564200-e75d5e30476c"),
+                Item("New York Cheesecake", "Classic creamy cheesecake with strawberry drizzle.", 3000m, "photo-1533134242443-d4fd215305ad"),
+                Item("Fresh Iced Lemonade", "House-made freshly squeezed lemonade over ice.", 1500m, "photo-1513558161293-cdaf765ed2fd")
             ]
         }
     ];

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using backend.Models;
 
 namespace backend.Dtos;
 
@@ -24,6 +25,15 @@ public class CreateOrderRequest : IValidatableObject
     [StringLength(300)]
     public string? DeliveryAddress { get; set; }
 
+    // "Online" (Paystack) or "Counter" (cash/POS in person). Delivery orders must be paid online.
+    [Required]
+    public string PaymentMethod { get; set; } = PaymentMethods.Online;
+
+    // Online payments need an email or a phone number. Paystack emails the receipt to the email; with only a phone,
+    // the server gives Paystack a placeholder address (see PaystackOptions.PhoneOnlyEmailDomain).
+    [StringLength(254), EmailAddress(ErrorMessage = "Enter a valid email address.")]
+    public string? CustomerEmail { get; set; }
+
     [Required, MinLength(1)]
     public List<CreateOrderItemRequest> Items { get; set; } = new();
 
@@ -37,8 +47,24 @@ public class CreateOrderRequest : IValidatableObject
             yield break;
         }
 
+        if (!PaymentMethods.All.Contains(PaymentMethod))
+        {
+            yield return new ValidationResult(
+                $"Payment method must be one of: {string.Join(", ", PaymentMethods.All)}",
+                [nameof(PaymentMethod)]);
+        }
+        else if (PaymentMethod == PaymentMethods.Online
+            && string.IsNullOrWhiteSpace(CustomerEmail) && string.IsNullOrWhiteSpace(CustomerPhone))
+        {
+            yield return new ValidationResult("An email address or phone number is required to pay online.", [nameof(CustomerEmail)]);
+        }
+        else if (FulfillmentType == Delivery && PaymentMethod != PaymentMethods.Online)
+        {
+            yield return new ValidationResult("Delivery orders must be paid online.", [nameof(PaymentMethod)]);
+        }
+
         // CustomerName is checked by [Required] for every order type.
-        if (FulfillmentType == DineIn) yield break; // Eat-in orders only need a name.
+        if (FulfillmentType == DineIn) yield break; // Eat-in orders only need a name (plus email or phone to pay online).
 
         if (string.IsNullOrWhiteSpace(CustomerPhone))
         {

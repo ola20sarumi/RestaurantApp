@@ -1,12 +1,13 @@
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DOCUMENT } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
-import { CustomerDetails, FULFILLMENT_OPTIONS, FulfillmentType, Order } from '../../../models/restaurant.models';
+import { CustomerDetails, FULFILLMENT_OPTIONS, FulfillmentType, Order, PaymentMethod } from '../../../models/restaurant.models';
 import { CartService } from '../../../services/cart.service';
 import { OrderService } from '../../../services/order.service';
+import { PaymentService } from '../../../services/payment.service';
 import { describeApiError } from '../../../services/api-error';
 
 @Component({
@@ -18,6 +19,9 @@ import { describeApiError } from '../../../services/api-error';
 export class CheckoutComponent {
   readonly cart = inject(CartService);
   private readonly orderService = inject(OrderService);
+  private readonly paymentService = inject(PaymentService);
+  private readonly router = inject(Router);
+  private readonly document = inject(DOCUMENT);
 
   readonly fulfillmentOptions = FULFILLMENT_OPTIONS;
 
@@ -26,18 +30,27 @@ export class CheckoutComponent {
   customerName = '';
   customerPhone = '';
   deliveryAddress = '';
+  paymentMethod: PaymentMethod = 'Online';
+  customerEmail = '';
+  /** How an online payer identifies themselves to Paystack. */
+  payerContact: 'Email' | 'Phone' = 'Email';
 
   readonly isSubmitting = signal(false);
   readonly error = signal<string | null>(null);
-  readonly placedOrder = signal<Order | null>(null);
-  /** Label and icon for the placed order's type, shown on the confirmation. */
-  readonly placedOrderOption = computed(() =>
-    FULFILLMENT_OPTIONS.find(o => o.value === this.placedOrder()?.fulfillmentType)
-  );
 
   /** Eat-in orders only need a name; takeout and delivery also need a phone number. */
   get needsPhone(): boolean {
     return this.fulfillmentType === 'Takeout' || this.fulfillmentType === 'Delivery';
+  }
+
+  /** Online payers who choose "Phone" give a phone number instead of an email (eat-in asks for it in the payment step). */
+  get paysByPhone(): boolean {
+    return this.paysOnline && this.payerContact === 'Phone';
+  }
+
+  /** Delivery orders are always paid online; the others let the customer choose. */
+  get paysOnline(): boolean {
+    return this.fulfillmentType === 'Delivery' || this.paymentMethod === 'Online';
   }
 
   selectOrderType(type: FulfillmentType): void {
@@ -53,23 +66,38 @@ export class CheckoutComponent {
     const details: CustomerDetails = {
       fulfillmentType: this.fulfillmentType,
       customerName: this.customerName.trim(),
-      customerPhone: this.needsPhone ? this.customerPhone.trim() : undefined,
-      deliveryAddress: this.fulfillmentType === 'Delivery' ? this.deliveryAddress.trim() : undefined
+      customerPhone: this.needsPhone || this.paysByPhone ? this.customerPhone.trim() : undefined,
+      deliveryAddress: this.fulfillmentType === 'Delivery' ? this.deliveryAddress.trim() : undefined,
+      paymentMethod: this.paysOnline ? 'Online' : 'Counter',
+      customerEmail: this.paysOnline && !this.paysByPhone ? this.customerEmail.trim() : undefined
     };
 
     this.isSubmitting.set(true);
     this.error.set(null);
 
     this.orderService.createOrder(this.cart.toOrderRequest(details)).subscribe({
-      next: (order) => {
-        this.placedOrder.set(order);
-        this.cart.clear();
-        this.isSubmitting.set(false);
-      },
+      next: (order) => (order.paymentMethod === 'Online' ? this.payOnline(order) : this.showConfirmation(order)),
       error: (err: HttpErrorResponse) => {
         this.error.set(describeApiError(err, 'Could not place your order. Please try again.'));
         this.isSubmitting.set(false);
       }
+    });
+  }
+
+  /** Pay-at-counter orders are done: the cart is emptied and the confirmation page shows the order. */
+  private showConfirmation(order: Order): void {
+    this.cart.clear();
+    this.router.navigate(['/order', order.reference]);
+  }
+
+  /**
+   * Sends the customer to Paystack. The cart is kept until the payment is confirmed (on the order page), so a customer
+   * who gives up on Paystack can come back to it. If the payment can't be started, the order page offers a retry.
+   */
+  private payOnline(order: Order): void {
+    this.paymentService.startPayment(order.reference).subscribe({
+      next: (url) => this.document.location.assign(url),
+      error: () => this.router.navigate(['/order', order.reference])
     });
   }
 }

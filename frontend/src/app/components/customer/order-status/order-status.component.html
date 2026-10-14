@@ -1,0 +1,113 @@
+@if (loading()) {
+  <div class="d-flex align-items-center gap-2 text-body-secondary py-5 justify-content-center">
+    <div class="spinner-border spinner-border-sm" role="status"></div>
+    <span>Checking your order…</span>
+  </div>
+} @else {
+  @let o = order();
+  @if (!o) {
+    <div class="text-center text-body-secondary py-5">
+      <i class="bi bi-question-circle display-4 d-block mb-3"></i>
+      <p role="alert">{{ error() }}</p>
+      <a routerLink="/menu" class="btn btn-primary">Back to Menu</a>
+    </div>
+  } @else if (awaitingPayment()) {
+    <!-- Online order whose payment hasn't gone through (cancelled on Paystack, failed, or still processing) -->
+    <div class="card border-0 shadow-sm text-center mx-auto confirmation">
+      <div class="card-body p-4 p-md-5">
+        <i class="bi bi-hourglass-split text-warning display-4 d-block mb-3"></i>
+        <h1 class="h3 fw-bold">Payment not completed</h1>
+        <p class="text-body-secondary mt-2">
+          We haven't received payment for order <strong>#{{ o.id }}</strong> yet, so we haven't started preparing it.
+          If you've just paid, give it a moment and check again.
+        </p>
+        <div class="fs-4 fw-bold my-3">{{ o.totalAmount | currency }}</div>
+
+        @if (error()) {
+          <div class="alert alert-danger d-flex align-items-center gap-2 text-start" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>{{ error() }}</span>
+          </div>
+        }
+
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+          <button type="button" class="btn btn-primary btn-lg" (click)="pay()" [disabled]="paying()">
+            @if (paying()) {
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Taking you to Paystack…
+            } @else {
+              <i class="bi bi-lock-fill me-1"></i>Pay {{ o.totalAmount | currency }}
+            }
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-lg" (click)="refresh()" [disabled]="checking()">
+            <i class="bi bi-arrow-clockwise me-1"></i>Check again
+          </button>
+        </div>
+        <a routerLink="/cart" class="btn btn-link mt-3">Back to cart</a>
+      </div>
+    </div>
+  } @else {
+    <!-- Success confirmation: paid online, or to be paid at the counter -->
+    <div class="card border-0 shadow-sm text-center mx-auto confirmation">
+      <div class="card-body p-4 p-md-5">
+        <i class="bi bi-check-circle-fill text-success display-4 d-block mb-3"></i>
+        <h1 class="h3 fw-bold">🎉 Order Placed Successfully!</h1>
+        <p class="lead mt-2">Your Order ID is <strong>#{{ o.id }}</strong>.</p>
+
+        @switch (o.fulfillmentType) {
+          @case ('DineIn') {
+            <p class="text-body-secondary">
+              Thanks, {{ o.customerName }}! Please take a seat — we'll bring your food to your table.
+            </p>
+          }
+          @case ('Takeout') {
+            <p class="text-body-secondary">
+              Thanks, {{ o.customerName }}! We'll have it ready at the counter. Just give us your order number.
+            </p>
+          }
+          @default {
+            <p class="text-body-secondary">
+              Thanks, {{ o.customerName }}! We have received your details and are preparing your order.
+            </p>
+          }
+        }
+
+        <div class="d-flex flex-wrap justify-content-center gap-4 my-4">
+          <div>
+            <div class="small text-body-secondary">Total</div>
+            <div class="fs-5 fw-bold">{{ o.totalAmount | currency }}</div>
+          </div>
+          <div>
+            <div class="small text-body-secondary">Order type</div>
+            <div class="fs-5 fw-bold">
+              @if (fulfillmentOption(); as option) {
+                <i [class]="'bi me-1 ' + option.icon"></i>{{ option.label }}
+              }
+            </div>
+          </div>
+          <div>
+            <div class="small text-body-secondary">Status</div>
+            <div class="fs-5"><span class="badge text-bg-warning order-status">{{ o.status }}</span></div>
+          </div>
+          <div>
+            <div class="small text-body-secondary">Payment</div>
+            <div class="fs-5">
+              @if (o.paymentStatus === 'Paid') {
+                <span class="badge text-bg-success payment-status"><i class="bi bi-check-lg me-1"></i>Paid</span>
+              } @else {
+                <span class="badge text-bg-light payment-status">Pay at the counter</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <ul class="list-unstyled small text-body-secondary mb-4">
+          @for (item of o.items; track $index) {
+            <li>{{ item.quantity }} × {{ item.name }}</li>
+          }
+        </ul>
+
+        <a routerLink="/menu" class="btn btn-primary btn-lg">Back to Menu</a>
+      </div>
+    </div>
+  }
+}

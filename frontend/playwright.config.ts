@@ -73,10 +73,22 @@ export default defineConfig({
   /* Start the API and the Angular dev server before the tests (or reuse ones already running locally). */
   webServer: [
     {
+      // Stands in for Paystack (see tests/fake-paystack.mjs).
+      command: 'node tests/fake-paystack.mjs',
+      url: 'http://localhost:5055/health',
+      reuseExistingServer: !process.env['CI'],
+    },
+    {
       command: 'dotnet run --project ../backend',
       url: 'http://localhost:5044/api/categories',
       reuseExistingServer: !process.env['CI'],
       timeout: 120 * 1000,
+      // Point the API at the fake Paystack. An API you started yourself uses your real (test) keys instead,
+      // and the online-payment tests skip themselves.
+      env: {
+        Paystack__BaseUrl: 'http://localhost:5055/',
+        Paystack__SecretKey: 'sk_test_fake_for_e2e',
+      },
     },
     {
       command: 'npm start',

@@ -1,187 +1,199 @@
-@let order = placedOrder();
-@if (order) {
-  <!-- Success confirmation -->
-  <div class="card border-0 shadow-sm text-center mx-auto confirmation">
-    <div class="card-body p-4 p-md-5">
-      <i class="bi bi-check-circle-fill text-success display-4 d-block mb-3"></i>
-      <h1 class="h3 fw-bold">🎉 Order Placed Successfully!</h1>
-      <p class="lead mt-2">Your Order ID is <strong>#{{ order.id }}</strong>.</p>
+<h1 class="h3 fw-bold mb-4"><i class="bi bi-credit-card me-2 text-brand"></i>Checkout</h1>
 
-      @switch (order.fulfillmentType) {
-        @case ('DineIn') {
-          <p class="text-body-secondary">
-            Thanks, {{ order.customerName }}! Please take a seat — we'll bring your food to your table.
-          </p>
-        }
-        @case ('Takeout') {
-          <p class="text-body-secondary">
-            Thanks, {{ order.customerName }}! We'll have it ready at the counter. Just give us your order number.
-          </p>
-        }
-        @default {
-          <p class="text-body-secondary">
-            Thanks, {{ order.customerName }}! We have received your details and are preparing your order.
-          </p>
-        }
-      }
-
-      <div class="d-flex flex-wrap justify-content-center gap-4 my-4">
-        <div>
-          <div class="small text-body-secondary">Total</div>
-          <div class="fs-5 fw-bold">{{ order.totalAmount | currency }}</div>
-        </div>
-        <div>
-          <div class="small text-body-secondary">Order type</div>
-          <div class="fs-5 fw-bold">
-            @if (placedOrderOption(); as option) {
-              <i [class]="'bi me-1 ' + option.icon"></i>{{ option.label }}
-            }
-          </div>
-        </div>
-        <div>
-          <div class="small text-body-secondary">Status</div>
-          <div class="fs-5"><span class="badge text-bg-warning">{{ order.status }}</span></div>
-        </div>
-      </div>
-
-      @if (order.deliveryAddress) {
-        <p class="small text-body-secondary mb-4">Delivering to: {{ order.deliveryAddress }}</p>
-      }
-
-      <a routerLink="/menu" class="btn btn-primary btn-lg">Back to Menu</a>
-    </div>
+@if (cart.items().length === 0) {
+  <div class="text-center text-body-secondary py-5">
+    <i class="bi bi-bag-x display-4 d-block mb-3"></i>
+    <p>Your cart is empty.</p>
+    <a routerLink="/menu" class="btn btn-primary">Browse the menu</a>
   </div>
 } @else {
-  <h1 class="h3 fw-bold mb-4"><i class="bi bi-credit-card me-2 text-brand"></i>Checkout</h1>
+  <div class="row g-4">
+    <!-- Form section -->
+    <div class="col-md-7">
+      <div class="card border-0 shadow-sm p-4">
+        <form #checkoutForm="ngForm" (ngSubmit)="submitOrder(checkoutForm)" novalidate>
+          <!-- Step 1: order type -->
+          <fieldset class="mb-4">
+            <legend class="h5 mb-3">How would you like your order?</legend>
+            <div class="row row-cols-1 row-cols-sm-3 g-2">
+              @for (option of fulfillmentOptions; track option.value) {
+                <div class="col">
+                  <input type="radio" class="btn-check" name="fulfillmentType" [id]="'type-' + option.value"
+                         [value]="option.value" [ngModel]="fulfillmentType" (ngModelChange)="selectOrderType($event)">
+                  <label class="btn btn-outline-primary w-100 h-100 py-3 order-type" [for]="'type-' + option.value">
+                    <i [class]="'bi d-block fs-3 mb-1 ' + option.icon"></i>
+                    <span class="fw-semibold d-block">{{ option.label }}</span>
+                    <small class="hint d-block">{{ option.hint }}</small>
+                  </label>
+                </div>
+              }
+            </div>
+            @if (checkoutForm.submitted && !fulfillmentType) {
+              <div class="text-danger small mt-2" role="alert">Please choose how you'd like your order.</div>
+            }
+          </fieldset>
 
-  @if (cart.items().length === 0) {
-    <div class="text-center text-body-secondary py-5">
-      <i class="bi bi-bag-x display-4 d-block mb-3"></i>
-      <p>Your cart is empty.</p>
-      <a routerLink="/menu" class="btn btn-primary">Browse the menu</a>
-    </div>
-  } @else {
-    <div class="row g-4">
-      <!-- Form section -->
-      <div class="col-md-7">
-        <div class="card border-0 shadow-sm p-4">
-          <form #checkoutForm="ngForm" (ngSubmit)="submitOrder(checkoutForm)" novalidate>
-            <!-- Step 1: order type -->
-            <fieldset class="mb-4">
-              <legend class="h5 mb-3">How would you like your order?</legend>
-              <div class="row row-cols-1 row-cols-sm-3 g-2">
-                @for (option of fulfillmentOptions; track option.value) {
+          <!-- Step 2: customer details — name always; phone for takeout/delivery; address for delivery -->
+          @if (fulfillmentType) {
+            <h2 class="h5 mb-3">
+              @switch (fulfillmentType) {
+                @case ('DineIn') {
+                  Your name
+                }
+                @case ('Takeout') {
+                  Pickup details
+                }
+                @default {
+                  Delivery details
+                }
+              }
+            </h2>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="customerName">Full Name *</label>
+              <input id="customerName" type="text" class="form-control" name="customerName"
+                     [(ngModel)]="customerName" #nameField="ngModel"
+                     required maxlength="100" autocomplete="name" placeholder="e.g. Jane Doe"
+                     [class.is-invalid]="nameField.invalid && (nameField.touched || checkoutForm.submitted)">
+              <div class="invalid-feedback">Please enter your name.</div>
+              @if (fulfillmentType === 'DineIn') {
+                <div class="form-text">So we know whose order it is when we bring it to your table.</div>
+              }
+            </div>
+
+            @if (needsPhone) {
+              <div class="mb-3">
+                <label class="form-label fw-semibold" for="customerPhone">Phone Number *</label>
+                <input id="customerPhone" type="tel" class="form-control" name="customerPhone"
+                       [(ngModel)]="customerPhone" #phoneField="ngModel"
+                       required maxlength="30" pattern="[0-9+\(\)\-\s]{7,30}" autocomplete="tel"
+                       placeholder="e.g. (555) 123-4567"
+                       [class.is-invalid]="phoneField.invalid && (phoneField.touched || checkoutForm.submitted)">
+                <div class="invalid-feedback">
+                  {{ phoneField.errors?.['required'] ? 'Please enter your phone number.' : 'Please enter a valid phone number.' }}
+                </div>
+              </div>
+            }
+
+            @if (fulfillmentType === 'Delivery') {
+              <div class="mb-3">
+                <label class="form-label fw-semibold" for="deliveryAddress">Delivery Address *</label>
+                <textarea id="deliveryAddress" class="form-control" name="deliveryAddress" rows="3"
+                          [(ngModel)]="deliveryAddress" #addressField="ngModel"
+                          required maxlength="300" autocomplete="street-address"
+                          placeholder="Street address, Apartment/Suite #, City, Zip Code"
+                          [class.is-invalid]="addressField.invalid && (addressField.touched || checkoutForm.submitted)"></textarea>
+                <div class="invalid-feedback">Please enter your delivery address.</div>
+              </div>
+            }
+
+            <!-- Step 3: payment — online with Paystack, or at the counter (not for delivery) -->
+            <fieldset class="mt-4 mb-3">
+              <legend class="h5 mb-3">Payment</legend>
+              @if (fulfillmentType === 'Delivery') {
+                <p class="small text-body-secondary">
+                  <i class="bi bi-shield-lock me-1"></i>Delivery orders are paid online before we start cooking.
+                </p>
+              } @else {
+                <div class="row row-cols-1 row-cols-sm-2 g-2 mb-3">
                   <div class="col">
-                    <input type="radio" class="btn-check" name="fulfillmentType" [id]="'type-' + option.value"
-                           [value]="option.value" [ngModel]="fulfillmentType" (ngModelChange)="selectOrderType($event)">
-                    <label class="btn btn-outline-primary w-100 h-100 py-3 order-type" [for]="'type-' + option.value">
-                      <i [class]="'bi d-block fs-3 mb-1 ' + option.icon"></i>
-                      <span class="fw-semibold d-block">{{ option.label }}</span>
-                      <small class="hint d-block">{{ option.hint }}</small>
+                    <input type="radio" class="btn-check" name="paymentMethod" id="pay-Online" value="Online" [(ngModel)]="paymentMethod">
+                    <label class="btn btn-outline-primary w-100 h-100 py-2 order-type" for="pay-Online">
+                      <span class="fw-semibold d-block"><i class="bi bi-credit-card me-1"></i>Pay now</span>
+                      <small class="hint d-block">Card, bank transfer or USSD</small>
                     </label>
                   </div>
-                }
-              </div>
-              @if (checkoutForm.submitted && !fulfillmentType) {
-                <div class="text-danger small mt-2" role="alert">Please choose how you'd like your order.</div>
-              }
-            </fieldset>
-
-            <!-- Step 2: customer details — name always; phone for takeout/delivery; address for delivery -->
-            @if (fulfillmentType) {
-              <h2 class="h5 mb-3">
-                @switch (fulfillmentType) {
-                  @case ('DineIn') {
-                    Your name
-                  }
-                  @case ('Takeout') {
-                    Pickup details
-                  }
-                  @default {
-                    Delivery details
-                  }
-                }
-              </h2>
-
-              <div class="mb-3">
-                <label class="form-label fw-semibold" for="customerName">Full Name *</label>
-                <input id="customerName" type="text" class="form-control" name="customerName"
-                       [(ngModel)]="customerName" #nameField="ngModel"
-                       required maxlength="100" autocomplete="name" placeholder="e.g. Jane Doe"
-                       [class.is-invalid]="nameField.invalid && (nameField.touched || checkoutForm.submitted)">
-                <div class="invalid-feedback">Please enter your name.</div>
-                @if (fulfillmentType === 'DineIn') {
-                  <div class="form-text">So we know whose order it is when we bring it to your table.</div>
-                }
-              </div>
-
-              @if (needsPhone) {
-                <div class="mb-3">
-                  <label class="form-label fw-semibold" for="customerPhone">Phone Number *</label>
-                  <input id="customerPhone" type="tel" class="form-control" name="customerPhone"
-                         [(ngModel)]="customerPhone" #phoneField="ngModel"
-                         required maxlength="30" pattern="[0-9+\(\)\-\s]{7,30}" autocomplete="tel"
-                         placeholder="e.g. (555) 123-4567"
-                         [class.is-invalid]="phoneField.invalid && (phoneField.touched || checkoutForm.submitted)">
-                  <div class="invalid-feedback">
-                    {{ phoneField.errors?.['required'] ? 'Please enter your phone number.' : 'Please enter a valid phone number.' }}
+                  <div class="col">
+                    <input type="radio" class="btn-check" name="paymentMethod" id="pay-Counter" value="Counter" [(ngModel)]="paymentMethod">
+                    <label class="btn btn-outline-primary w-100 h-100 py-2 order-type" for="pay-Counter">
+                      <span class="fw-semibold d-block"><i class="bi bi-cash-coin me-1"></i>Pay at the counter</span>
+                      <small class="hint d-block">Cash or card at the restaurant</small>
+                    </label>
                   </div>
                 </div>
               }
 
-              @if (fulfillmentType === 'Delivery') {
-                <div class="mb-3">
-                  <label class="form-label fw-semibold" for="deliveryAddress">Delivery Address *</label>
-                  <textarea id="deliveryAddress" class="form-control" name="deliveryAddress" rows="3"
-                            [(ngModel)]="deliveryAddress" #addressField="ngModel"
-                            required maxlength="300" autocomplete="street-address"
-                            placeholder="Street address, Apartment/Suite #, City, Zip Code"
-                            [class.is-invalid]="addressField.invalid && (addressField.touched || checkoutForm.submitted)"></textarea>
-                  <div class="invalid-feedback">Please enter your delivery address.</div>
+              @if (paysOnline) {
+                <div class="mb-2">
+                  <div class="d-flex flex-wrap align-items-center gap-2 mb-2" role="radiogroup" aria-label="Pay with your">
+                    <span class="small text-body-secondary">Pay with your</span>
+                    <input type="radio" class="btn-check" name="payerContact" id="contact-Email" value="Email" [(ngModel)]="payerContact">
+                    <label class="btn btn-sm btn-outline-primary" for="contact-Email"><i class="bi bi-envelope me-1"></i>Email</label>
+                    <input type="radio" class="btn-check" name="payerContact" id="contact-Phone" value="Phone" [(ngModel)]="payerContact">
+                    <label class="btn btn-sm btn-outline-primary" for="contact-Phone"><i class="bi bi-phone me-1"></i>Phone number</label>
+                  </div>
+
+                  @if (!paysByPhone) {
+                    <label class="form-label fw-semibold" for="customerEmail">Email for your receipt *</label>
+                    <input id="customerEmail" type="email" class="form-control" name="customerEmail"
+                           [(ngModel)]="customerEmail" #emailField="ngModel"
+                           required email maxlength="254" autocomplete="email" placeholder="e.g. jane@example.com"
+                           [class.is-invalid]="emailField.invalid && (emailField.touched || checkoutForm.submitted)">
+                    <div class="invalid-feedback">
+                      {{ emailField.errors?.['required'] ? 'Please enter your email address.' : 'Please enter a valid email address.' }}
+                    </div>
+                  } @else if (needsPhone) {
+                    <p class="small mb-0">We'll use the phone number above. Paystack won't send an email receipt.</p>
+                  } @else {
+                    <label class="form-label fw-semibold" for="payerPhone">Phone Number *</label>
+                    <input id="payerPhone" type="tel" class="form-control" name="customerPhone"
+                           [(ngModel)]="customerPhone" #payerPhoneField="ngModel"
+                           required maxlength="30" pattern="[0-9+\(\)\-\s]{7,30}" autocomplete="tel"
+                           placeholder="e.g. 0803 123 4567"
+                           [class.is-invalid]="payerPhoneField.invalid && (payerPhoneField.touched || checkoutForm.submitted)">
+                    <div class="invalid-feedback">
+                      {{ payerPhoneField.errors?.['required'] ? 'Please enter your phone number.' : 'Please enter a valid phone number.' }}
+                    </div>
+                    <div class="form-text">Paystack won't send an email receipt. Your order page shows the payment.</div>
+                  }
+                  <div class="form-text"><i class="bi bi-lock me-1"></i>You'll pay securely on Paystack's page, then come back here.</div>
                 </div>
               }
-            }
+            </fieldset>
+          }
 
-            @if (error()) {
-              <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
-                <i class="bi bi-exclamation-triangle-fill"></i>
-                <span>{{ error() }}</span>
-              </div>
-            }
+          @if (error()) {
+            <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              <span>{{ error() }}</span>
+            </div>
+          }
 
-            <button type="submit" class="btn btn-primary btn-lg w-100 mt-2" [disabled]="isSubmitting()">
-              @if (isSubmitting()) {
-                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Submitting Order…
-              } @else {
-                Confirm &amp; Place Order
-              }
-            </button>
-          </form>
-        </div>
-      </div>
-
-      <!-- Order summary sidebar -->
-      <div class="col-md-5">
-        <div class="card border-0 shadow-sm p-4">
-          <h2 class="h5 mb-3">Order Summary</h2>
-          <ul class="list-group list-group-flush mb-3">
-            @for (item of cart.items(); track item.product.id) {
-              <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                <div>
-                  <div class="fw-semibold">{{ item.product.name }}</div>
-                  <small class="text-body-secondary">Qty: {{ item.quantity }} × {{ item.product.price | currency }}</small>
-                </div>
-                <span class="fw-bold">{{ item.product.price * item.quantity | currency }}</span>
-              </li>
+          <button type="submit" class="btn btn-primary btn-lg w-100 mt-2" [disabled]="isSubmitting()">
+            @if (isSubmitting()) {
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+              {{ paysOnline ? 'Taking you to Paystack…' : 'Submitting Order…' }}
+            } @else if (fulfillmentType && paysOnline) {
+              <i class="bi bi-lock-fill me-1"></i>Pay {{ cart.total() | currency }}
+            } @else {
+              Confirm &amp; Place Order
             }
-          </ul>
-          <div class="d-flex justify-content-between fs-5 fw-bold border-top pt-3">
-            <span>Total:</span>
-            <span>{{ cart.total() | currency }}</span>
-          </div>
-          <a routerLink="/cart" class="btn btn-link px-0 mt-2 align-self-start"><i class="bi bi-arrow-left me-1"></i>Edit cart</a>
-        </div>
+          </button>
+        </form>
       </div>
     </div>
-  }
+
+    <!-- Order summary sidebar -->
+    <div class="col-md-5">
+      <div class="card border-0 shadow-sm p-4">
+        <h2 class="h5 mb-3">Order Summary</h2>
+        <ul class="list-group list-group-flush mb-3">
+          @for (item of cart.items(); track item.product.id) {
+            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+              <div>
+                <div class="fw-semibold">{{ item.product.name }}</div>
+                <small class="text-body-secondary">Qty: {{ item.quantity }} × {{ item.product.price | currency }}</small>
+              </div>
+              <span class="fw-bold">{{ item.product.price * item.quantity | currency }}</span>
+            </li>
+          }
+        </ul>
+        <div class="d-flex justify-content-between fs-5 fw-bold border-top pt-3">
+          <span>Total:</span>
+          <span>{{ cart.total() | currency }}</span>
+        </div>
+        <a routerLink="/cart" class="btn btn-link px-0 mt-2 align-self-start"><i class="bi bi-arrow-left me-1"></i>Edit cart</a>
+      </div>
+    </div>
+  </div>
 }

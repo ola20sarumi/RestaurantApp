@@ -35,16 +35,20 @@ public class OrdersController : ControllerBase
             return Problem(detail: $"Products not found or unavailable: {string.Join(", ", missing)}", statusCode: StatusCodes.Status400BadRequest);
         }
 
-        var isDineIn = request.FulfillmentType == CreateOrderRequest.DineIn;
         var order = new Order
         {
             OrderDate = DateTime.UtcNow,
             Status = "Pending",
+            Reference = Guid.NewGuid().ToString("N"),
             FulfillmentType = request.FulfillmentType,
             CustomerName = request.CustomerName.Trim(),
-            // Eat-in orders only take a name; phone is kept for takeout/delivery.
-            CustomerPhone = isDineIn ? string.Empty : request.CustomerPhone!.Trim(),
+            // Takeout/delivery always have a phone; eat-in only when the customer pays online by phone.
+            CustomerPhone = request.CustomerPhone?.Trim() ?? string.Empty,
             DeliveryAddress = request.FulfillmentType == CreateOrderRequest.Delivery ? request.DeliveryAddress!.Trim() : null,
+            PaymentMethod = request.PaymentMethod,
+            CustomerEmail = request.PaymentMethod == PaymentMethods.Online && !string.IsNullOrWhiteSpace(request.CustomerEmail)
+                ? request.CustomerEmail.Trim()
+                : null,
             Items = request.Items.Select(i => new OrderItem
             {
                 ProductId = i.ProductId,
@@ -57,6 +61,7 @@ public class OrdersController : ControllerBase
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();
 
+        // Online orders are paid next: the client calls POST /api/payments/{reference}/initialize.
         return CreatedAtAction(nameof(GetOrderById), new { id = order.Id }, order);
     }
 
@@ -75,7 +80,8 @@ public class OrdersController : ControllerBase
         return order;
     }
 
-    // Cashier: Get all orders (with optional status filter)
+    // Cashier: Get all orders (with optional status filter). Online orders appear once they are paid;
+    // until then the customer may still be on the Paystack page, or may have given up.
     [HttpGet]
     [Authorize(Roles = Roles.Staff)]
     public async Task<ActionResult<IEnumerable<Order>>> GetOrders([FromQuery] string? status)
@@ -83,7 +89,7 @@ public class OrdersController : ControllerBase
         var query = _context.Orders
             .Include(o => o.Items)
             .ThenInclude(oi => oi.Product)
-            .AsQueryable();
+            .Where(o => o.PaymentMethod != PaymentMethods.Online || o.PaymentStatus == PaymentStatuses.Paid);
 
         if (!string.IsNullOrEmpty(status))
         {
@@ -199,6 +205,29 @@ public class OrdersController : ControllerBase
 
         order.Status = status;
         await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    // Cashier: record that a pay-at-counter order was paid (cash/POS). Online orders are marked paid by Paystack only.
+    [HttpPost("{id}/mark-paid")]
+    [Authorize(Roles = Roles.Staff)]
+    public async Task<IActionResult> MarkPaid(int id)
+    {
+        var order = await _context.Orders.FindAsync(id);
+        if (order == null) return NotFound();
+
+        if (order.PaymentMethod != PaymentMethods.Counter)
+        {
+            return Problem(detail: "Online orders are marked paid by Paystack.", statusCode: StatusCodes.Status409Conflict);
+        }
+
+        if (order.PaymentStatus != PaymentStatuses.Paid)
+        {
+            order.PaymentStatus = PaymentStatuses.Paid;
+            order.PaidAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+        }
 
         return NoContent();
     }
