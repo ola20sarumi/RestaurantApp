@@ -21,7 +21,7 @@ public class ProductRequest
     [StringLength(500)]
     public string? Description { get; set; }
 
-    [Range(0.01, 10000, ErrorMessage = "Price must be between 0.01 and 10,000.")]
+    [Range(0.01, 1000000, ErrorMessage = "Price must be between 0.01 and 1,000,000.")]
     public decimal Price { get; set; }
 
     [StringLength(500), Url(ErrorMessage = "Image URL must be a valid http(s) URL.")]

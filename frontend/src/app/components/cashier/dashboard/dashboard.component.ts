@@ -57,6 +57,13 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  markPaid(order: Order): void {
+    this.orderService.markPaid(order.id).subscribe({
+      next: () => this.loadOrders(),
+      error: () => this.error.set(`Could not mark order #${order.id} as paid.`)
+    });
+  }
+
   setStatus(order: Order, status: string): void {
     this.orderService.updateOrderStatus(order.id, status).subscribe({
       next: () => this.loadOrders(),

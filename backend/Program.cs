@@ -3,10 +3,12 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using backend.Auth;
 using backend.Data;
 using backend.Models;
+using backend.Payments;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +38,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 builder.Services.AddAuthorization();
+
+// Online payment with Paystack (see Controllers/PaymentsController.cs). Without Paystack:SecretKey it is switched off.
+builder.Services.Configure<PaystackOptions>(builder.Configuration.GetSection(PaystackOptions.SectionName));
+builder.Services.AddHttpClient<PaystackClient>((services, client) =>
+{
+    var paystack = services.GetRequiredService<IOptions<PaystackOptions>>().Value;
+    client.BaseAddress = new Uri(paystack.BaseUrl.TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 
 // 2. Add Controllers & OpenAPI
 builder.Services.AddControllers()

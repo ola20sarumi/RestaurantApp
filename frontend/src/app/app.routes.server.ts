@@ -2,7 +2,7 @@ import { RenderMode, ServerRoute } from '@angular/ssr';
 
 export const serverRoutes: ServerRoute[] = [
   {
-    // Staff pages need the login session, which only exists in the browser (localStorage), so the server
+    // Staff pages need the login session, which only exists in the browser (sessionStorage), so the server
     // can't render them or run their guard — they render client-side.
     path: 'admin',
     renderMode: RenderMode.Client
@@ -17,6 +17,11 @@ export const serverRoutes: ServerRoute[] = [
   },
   {
     path: 'login',
+    renderMode: RenderMode.Client
+  },
+  {
+    // Checks the payment with Paystack (a POST) and may empty the browser's cart, so it runs in the browser only.
+    path: 'order/:orderRef',
     renderMode: RenderMode.Client
   },
   {

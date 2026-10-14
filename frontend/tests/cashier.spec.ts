@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { createOrderViaApi, gotoApp, loginAs, uniqueName } from './helpers';
+import { createOnlineOrderViaApi, createOrderViaApi, gotoApp, loginAs, uniqueName } from './helpers';
 
 test.describe('Cashier dashboard', () => {
   test.beforeEach(async ({ page, request }) => {
@@ -23,6 +23,27 @@ test.describe('Cashier dashboard', () => {
 
     await card.getByRole('button', { name: 'Ready' }).click();
     await expect(status).toHaveText('Ready');
+  });
+
+  test('marks a pay-at-counter order as paid', async ({ page, request }) => {
+    const order = await createOrderViaApi(request, uniqueName('Counter pay'));
+
+    await gotoApp(page, '/cashier');
+    const card = page.locator('.card').filter({ has: page.getByText(`#${order.id}`, { exact: true }) });
+    await expect(card.locator('.payment-badge')).toHaveText('Unpaid · pay at counter');
+
+    await card.getByRole('button', { name: 'Mark as paid' }).click();
+    await expect(card.locator('.payment-badge')).toHaveText('Paid at counter');
+    await expect(card.getByRole('button', { name: 'Mark as paid' })).toHaveCount(0);
+  });
+
+  test('hides online orders until they are paid', async ({ page, request }) => {
+    const unpaid = await createOnlineOrderViaApi(request, uniqueName('Unpaid online'));
+    const counter = await createOrderViaApi(request, uniqueName('Counter'));
+
+    await gotoApp(page, '/cashier');
+    await expect(page.getByText(`#${counter.id}`, { exact: true })).toBeVisible();
+    await expect(page.getByText(`#${unpaid.id}`, { exact: true })).toHaveCount(0);
   });
 
   test('filters orders by status', async ({ page, request }) => {

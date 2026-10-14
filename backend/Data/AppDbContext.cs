@@ -27,6 +27,12 @@ public class AppDbContext : DbContext
             order.Property(o => o.CustomerPhone).HasMaxLength(30);
             order.Property(o => o.FulfillmentType).HasMaxLength(20).HasDefaultValue("Takeout");
             order.Property(o => o.DeliveryAddress).HasMaxLength(300);
+            order.Property(o => o.CustomerEmail).HasMaxLength(254);
+            order.Property(o => o.Reference).HasMaxLength(32);
+            order.HasIndex(o => o.Reference).IsUnique();
+            order.Property(o => o.PaymentMethod).HasMaxLength(20).HasDefaultValue(PaymentMethods.Counter);
+            order.Property(o => o.PaymentStatus).HasMaxLength(20).HasDefaultValue(PaymentStatuses.Unpaid);
+            order.Property(o => o.PaystackReference).HasMaxLength(100);
         });
 
         modelBuilder.Entity<User>(user =>

@@ -31,6 +31,11 @@ export class OrderService {
     return this.http.get<Order>(`${this.url}/${id}`);
   }
 
+  /** Cashier: record that a pay-at-counter order has been paid. */
+  markPaid(id: number): Observable<void> {
+    return this.http.post<void>(`${this.url}/${id}/mark-paid`, null);
+  }
+
   /** The API sets prices, total, orderDate and status ("Pending") itself. */
   createOrder(request: CreateOrderRequest): Observable<Order> {
     return this.http.post<Order>(this.url, request);
