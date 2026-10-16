@@ -16,7 +16,6 @@ A full-stack restaurant ordering system. Customers browse the menu, build a cart
 - [Try the demo](#try-the-demo)
 - [Features](#features)
 - [Tech stack](#tech-stack)
-- [Architecture](#architecture)
 - [Getting started](#getting-started)
 - [Configuration](#configuration)
 - [Payments with Paystack](#payments-with-paystack)
@@ -98,61 +97,6 @@ Open `dist/demo/restaurant-demo.html` in any browser, or share the file. A banne
 | Payments | Paystack (initialize, verify, webhook) |
 | Testing | Playwright (e2e), Karma + Jasmine (unit) |
 | CI | GitHub Actions with a SQL Server 2022 service container |
-
----
-
-## Architecture
-
-```mermaid
-flowchart LR
-    subgraph Browser
-        C[Customer pages<br/>/menu /cart /checkout /order/:ref]
-        S[Staff pages<br/>/cashier /admin /admin/reports]
-    end
-
-    SSR[Angular SSR server<br/>Express]
-    API[ASP.NET Core API<br/>:5044/api]
-    DB[(SQL Server<br/>RestaurantDb)]
-    PS[Paystack]
-
-    C -- HTML --> SSR
-    SSR -- fetch menu --> API
-    C -- REST/JSON --> API
-    S -- REST + JWT --> API
-    API --> DB
-    API -- initialize / verify --> PS
-    PS -- webhook --> API
-    PS -- redirect after payment --> C
-```
-
-**Domain model**
-
-```mermaid
-erDiagram
-    CATEGORY ||--o{ PRODUCT : contains
-    ORDER ||--o{ ORDER_ITEM : has
-    PRODUCT ||--o{ ORDER_ITEM : "ordered as"
-    USER {
-        string Username
-        string PasswordHash
-        string Role
-    }
-    ORDER {
-        string Reference
-        string FulfillmentType
-        string Status
-        string PaymentMethod
-        string PaymentStatus
-        decimal TotalAmount
-        datetime OrderDate
-    }
-    ORDER_ITEM {
-        int Quantity
-        decimal UnitPrice
-    }
-```
-
-`OrderItem.UnitPrice` stores the price at the moment of ordering, so later menu price changes never alter past orders or reports.
 
 ---
 
