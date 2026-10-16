@@ -23,8 +23,6 @@ A full-stack restaurant ordering system. Customers browse the menu, build a cart
 - [API reference](#api-reference)
 - [Testing](#testing)
 - [Project structure](#project-structure)
-- [Deploying](#deploying)
-- [Contributing](#contributing)
 - [License](#license)
 
 ---
@@ -343,8 +341,10 @@ Playwright starts the API, the Angular dev server and a **fake Paystack** (`test
 
 ```bash
 cd frontend
-npm test -- --watch=false --browsers=ChromeHeadless
+npm test -- --watch=false --browsers=Chrome
 ```
+
+This opens a visible Chrome window that runs the tests and then closes.
 
 ### Continuous integration
 
@@ -379,38 +379,6 @@ RestaurantApp/
 │   └── tests/                   Playwright e2e tests
 └── .github/workflows/           CI
 ```
-
----
-
-## Deploying
-
-A production checklist:
-
-1. **Database**: point `ConnectionStrings__DefaultConnection` at your server and run `dotnet ef database update` (or generate a migration script with `dotnet ef migrations script --idempotent`).
-2. **Secrets**: set `Jwt__Key` (32+ random bytes), `Paystack__SecretKey` and real `StaffAccounts` through environment variables or a secret store.
-3. **CORS**: set `Cors__AllowedOrigins__0=https://<your-frontend-host>`.
-4. **Paystack**: set `Paystack__CallbackUrl=https://<your-frontend-host>/order/{reference}` and register `https://<your-api-host>/api/payments/webhook` in the dashboard. Set `Paystack__PhoneOnlyEmailDomain` to a domain you own.
-5. **Frontend**: update `API_BASE_URL` in `api.config.ts`, add your hostname to `security.allowedHosts` in `angular.json` (otherwise SSR quietly falls back to client-side rendering), then:
-   ```bash
-   npm run build
-   PORT=4000 npm run serve:ssr:frontend
-   ```
-6. **HTTPS**: the API redirects to HTTPS outside Development, so serve it behind TLS.
-
----
-
-## Contributing
-
-1. Create a branch from `main`: `git checkout -b feature/my-change`
-2. Make your change, and add or update Playwright tests where it makes sense.
-3. Run `dotnet build` and `npm run e2e`.
-4. Open a pull request. CI must pass before merging.
-
-Conventions worth knowing:
-- Return errors as problem details (`Problem(detail: …, statusCode: …)`), never plain strings.
-- Add `[Authorize(Roles = …)]` to every new staff-only endpoint, and `RenderMode.Client` to every new staff page in `app.routes.server.ts`.
-- Configure `decimal(18,2)` precision in `AppDbContext` for any new money column.
-- Keep `models/restaurant.models.ts` in sync with `backend/Models`.
 
 ---
 
