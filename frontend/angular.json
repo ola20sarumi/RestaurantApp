@@ -61,6 +61,16 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "demo": {
+              "outputPath": "dist/demo",
+              "browser": "src/main.demo.ts",
+              "server": false,
+              "ssr": false,
+              "prerender": false,
+              "outputMode": "static",
+              "outputHashing": "none",
+              "extractLicenses": false
             }
           },
           "defaultConfiguration": "production"
