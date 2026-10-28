@@ -1,59 +1,207 @@
 /* Global theme on top of Bootstrap (loaded first via angular.json). */
 
 :root {
-  --brand: #c2410c;
-  --brand-dark: #9a3412;
-  --brand-soft: #fff1e6;
+  /* Hot jollof red-orange, sunny yellow and hot pink on a deep plum night. */
+  --brand: #ff4a1c;
+  --brand-dark: #d9340c;
+  --brand-soft: #ffe9e1;
+  --accent: #ffc531;
+  --accent-dark: #e6a800;
+  --accent-soft: #fff4d1;
+  --pink: #ff2e7e;
+  --night: #1b0b2e;
+  --night-2: #2c1250;
+  --cream: #fff8f1;
+  --ink: #1b0b2e;
+  --gradient-hot: linear-gradient(120deg, var(--brand) 0%, var(--pink) 100%);
+  --gradient-sun: linear-gradient(120deg, var(--accent) 0%, var(--brand) 100%);
+  --glow: 0 0.6rem 1.6rem rgba(255, 74, 28, 0.35);
+  --display-font: "Bricolage Grotesque", "DM Sans", system-ui, sans-serif;
 
-  --bs-body-bg: #faf8f5;
-  --bs-body-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --bs-link-color-rgb: 194, 65, 12;
-  --bs-link-hover-color-rgb: 154, 52, 18;
+  --bs-body-bg: var(--cream);
+  --bs-body-color: var(--ink);
+  --bs-body-font-family: "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --bs-border-color: #f0e2d6;
+  --bs-secondary-bg: #fbeee3;
+  --bs-tertiary-bg: #fdf3ea;
+  --bs-link-color-rgb: 217, 52, 12;
+  --bs-link-hover-color-rgb: 255, 46, 126;
   --bs-primary: var(--brand);
-  --bs-primary-rgb: 194, 65, 12;
+  --bs-primary-rgb: 255, 74, 28;
+  --bs-border-radius: 0.75rem;
+  --bs-border-radius-lg: 1.1rem;
+}
+
+body {
+  /* A faint warm dot pattern instead of a flat page. */
+  background-image: radial-gradient(rgba(255, 74, 28, 0.07) 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+
+h1, h2, h3, h4, .h1, .h2, .h3, .h4, .display-6, .navbar-brand, .card-title {
+  font-family: var(--display-font);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--night);
 }
 
 /* Bootstrap buttons use their own variables, so the brand colour is applied per variant. */
+.btn {
+  font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn:active {
+  transform: scale(0.95);
+}
+
 .btn-primary {
+  --bs-btn-color: #fff;
   --bs-btn-bg: var(--brand);
-  --bs-btn-border-color: var(--brand);
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-color: #fff;
   --bs-btn-hover-bg: var(--brand-dark);
-  --bs-btn-hover-border-color: var(--brand-dark);
+  --bs-btn-hover-border-color: transparent;
+  --bs-btn-active-color: #fff;
   --bs-btn-active-bg: var(--brand-dark);
-  --bs-btn-active-border-color: var(--brand-dark);
+  --bs-btn-active-border-color: transparent;
   --bs-btn-disabled-bg: var(--brand);
-  --bs-btn-disabled-border-color: var(--brand);
+  --bs-btn-disabled-border-color: transparent;
+  --bs-btn-focus-shadow-rgb: 255, 74, 28;
+  background-image: var(--gradient-hot);
+  box-shadow: var(--glow);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.9rem 2rem rgba(255, 46, 126, 0.4);
 }
 
 .btn-outline-primary {
-  --bs-btn-color: var(--brand);
-  --bs-btn-border-color: var(--brand);
+  --bs-btn-color: var(--brand-dark);
+  --bs-btn-bg: #fff;
+  --bs-btn-border-color: #ffc9b8;
+  --bs-btn-hover-color: #fff;
   --bs-btn-hover-bg: var(--brand);
   --bs-btn-hover-border-color: var(--brand);
-  --bs-btn-active-bg: var(--brand-dark);
-  --bs-btn-active-border-color: var(--brand-dark);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--brand);
+  --bs-btn-active-border-color: var(--brand);
+  --bs-btn-focus-shadow-rgb: 255, 74, 28;
+  border-width: 2px;
+}
+
+/* Selected radio "cards" (checkout order type / payment) get the full gradient. */
+.btn-check:checked + .btn-outline-primary {
+  background-image: var(--gradient-hot);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: var(--glow);
+}
+
+.btn-outline-secondary {
+  --bs-btn-color: #5a4a66;
+  --bs-btn-bg: #fff;
+  --bs-btn-border-color: #ead9cc;
+  --bs-btn-hover-color: var(--night);
+  --bs-btn-hover-bg: var(--accent-soft);
+  --bs-btn-hover-border-color: var(--accent);
+  --bs-btn-active-color: var(--night);
+  --bs-btn-active-bg: var(--accent);
+  --bs-btn-active-border-color: var(--accent);
+}
+
+.btn-link {
+  --bs-btn-color: var(--brand-dark);
+  --bs-btn-hover-color: var(--pink);
+  --bs-btn-active-color: var(--pink);
+  text-decoration: none;
 }
 
 .text-brand {
   color: var(--brand) !important;
 }
 
-.card {
-  --bs-card-bg: #fff;
+.text-accent {
+  color: var(--accent) !important;
 }
 
-.list-group {
-  --bs-list-group-bg: #fff;
-}
-
-.btn-link {
-  --bs-btn-color: var(--brand);
-  --bs-btn-hover-color: var(--brand-dark);
-  --bs-btn-active-color: var(--brand-dark);
-  text-decoration: none;
+.text-gradient {
+  background: var(--gradient-hot);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .form-control,
 .form-select {
   background-color: #fff;
+  border-width: 2px;
+}
+
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 0.3rem rgba(255, 74, 28, 0.18);
+}
+
+.form-check-input:checked {
+  background-color: var(--brand);
+  border-color: var(--brand);
+}
+
+.badge {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.badge.text-bg-light {
+  background-color: var(--accent-soft) !important;
+  color: #8a4b00 !important;
+}
+
+.badge.text-bg-primary {
+  background-image: var(--gradient-hot);
+}
+
+.card {
+  --bs-card-bg: #fff;
+  --bs-card-border-color: #f3e4d8;
+  --bs-card-border-radius: var(--bs-border-radius-lg);
+  box-shadow: 0 0.35rem 1.2rem rgba(27, 11, 46, 0.06);
+}
+
+.list-group {
+  --bs-list-group-bg: #fff;
+  --bs-list-group-border-color: #f3e4d8;
+}
+
+.nav-tabs {
+  --bs-nav-tabs-link-active-color: var(--brand-dark);
+  --bs-nav-link-color: #5a4a66;
+  --bs-nav-link-hover-color: var(--brand);
+}
+
+.nav-tabs .nav-link.active {
+  border-top: 3px solid var(--brand);
+  font-weight: 700;
+}
+
+.spinner-border {
+  color: var(--brand);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
