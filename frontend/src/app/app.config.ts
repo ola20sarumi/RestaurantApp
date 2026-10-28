@@ -7,6 +7,7 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { authInterceptor } from './services/auth.interceptor';
+import { serverApiInterceptor } from './services/server-api.interceptor';
 
 // Prices are in naira (Paystack charges in NGN): the currency pipe shows ₦3,500.00 and dates use Nigerian formats.
 registerLocaleData(localeEnNg);
@@ -16,7 +17,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withComponentInputBinding()),
     provideClientHydration(withEventReplay()),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor, serverApiInterceptor])),
     { provide: LOCALE_ID, useValue: 'en-NG' },
     { provide: DEFAULT_CURRENCY_CODE, useValue: 'NGN' }
   ]

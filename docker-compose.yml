@@ -1,0 +1,54 @@
+# Runs the whole app locally in Docker:  docker compose up --build
+#   site → http://localhost:4200   API → http://localhost:5044
+# Uses the Development settings (dev JWT key, admin/cashier logins, CORS for localhost:4200), so it is for
+# trying the app out, not for production. The database lives in the "db-data" volume
+# (docker compose down -v deletes it).
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:-Restaurant_Dev_Pass1}
+    volumes:
+      - db-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  # One-off: applies migrations and seeds the sample menu and staff logins (only into empty tables), then exits.
+  migrate:
+    build: ./backend
+    entrypoint: ["./efbundle"]
+    environment: &api-env
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Server=db;Database=RestaurantDb;User Id=sa;Password=${MSSQL_SA_PASSWORD:-Restaurant_Dev_Pass1};TrustServerCertificate=True;
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    build: ./backend
+    environment: *api-env
+    ports:
+      - "5044:8080"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  web:
+    build: ./frontend
+    environment:
+      # The browser calls the API at http://localhost:5044; the SSR server reaches it on the compose network.
+      API_INTERNAL_URL: http://api:8080/api
+    ports:
+      # 4200 on the host, because that is the origin the API's Development CORS settings allow.
+      - "4200:4000"
+    depends_on:
+      - api
+
+volumes:
+  db-data:
