@@ -1,7 +1,36 @@
-<section class="hero rounded-4 p-4 p-md-5 mb-4">
-  <h1 class="display-6 fw-bold mb-2">Our Menu</h1>
-  <p class="lead mb-0">Freshly prepared dishes — pick your favourites and we'll get cooking.</p>
+<section class="hero mb-4">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <div class="hero-content">
+    <span class="hero-kicker"><i class="bi bi-fire me-1"></i>Hot &amp; fresh today</span>
+    <h1 class="hero-title mb-3">Our <span class="hero-highlight">Menu</span></h1>
+    <p class="hero-lead mb-4">Freshly prepared dishes — pick your favourites and we'll get cooking.</p>
+    <div class="d-flex flex-wrap gap-2">
+      <span class="hero-perk"><i class="bi bi-lightning-charge-fill"></i>Ready fast</span>
+      <span class="hero-perk"><i class="bi bi-scooter"></i>Delivery</span>
+      <span class="hero-perk"><i class="bi bi-credit-card-2-front-fill"></i>Pay online or at the counter</span>
+    </div>
+  </div>
+
+  <div class="hero-food" aria-hidden="true">
+    <span class="food food-1">🍗</span>
+    <span class="food food-2">🍔</span>
+    <span class="food food-3">🌶️</span>
+    <span class="food food-4">🍰</span>
+    <span class="food food-5">🍹</span>
+  </div>
 </section>
+
+<div class="ticker mb-4" aria-hidden="true">
+  <div class="ticker-track">
+    @for (n of [1, 2]; track n) {
+      <span>🔥 Freshly made</span><span>⚡ Fast pickup</span><span>🛵 Hot delivery</span>
+      <span>🌶️ Bold flavours</span><span>😋 Order in seconds</span><span>💛 Made with love</span>
+    }
+  </div>
+</div>
 
 @if (loading()) {
   <div class="d-flex align-items-center gap-2 text-body-secondary py-5 justify-content-center">
@@ -20,7 +49,7 @@
   </div>
 } @else {
   <!-- Category filter -->
-  <div class="d-flex flex-wrap gap-2 mb-4" role="group" aria-label="Filter by category">
+  <div class="d-flex flex-wrap gap-2 mb-4 category-filter" role="group" aria-label="Filter by category">
     <button type="button" class="btn rounded-pill"
             [class.btn-primary]="selectedCategoryId() === null"
             [class.btn-outline-primary]="selectedCategoryId() !== null"
@@ -39,16 +68,19 @@
 
   <!-- Product grid -->
   <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
-    @for (product of filteredProducts(); track product.id) {
+    @for (product of filteredProducts(); track product.id; let i = $index) {
       <div class="col">
-        <div class="card h-100 border-0 shadow-sm product-card">
-          @if (product.imageUrl) {
-            <img [src]="product.imageUrl" class="card-img-top product-img" [alt]="product.name" loading="lazy">
-          } @else {
-            <div class="card-img-top product-img placeholder-img d-flex align-items-center justify-content-center">
-              <i class="bi bi-egg-fried"></i>
-            </div>
-          }
+        <div class="card h-100 border-0 product-card" [style.animation-delay.ms]="i * 60">
+          <div class="product-media">
+            @if (product.imageUrl) {
+              <img [src]="product.imageUrl" class="card-img-top product-img" [alt]="product.name" loading="lazy">
+            } @else {
+              <div class="card-img-top product-img placeholder-img d-flex align-items-center justify-content-center">
+                <i class="bi bi-egg-fried"></i>
+              </div>
+            }
+            <span class="price-tag">{{ product.price | currency }}</span>
+          </div>
           <div class="card-body d-flex flex-column">
             @if (product.category) {
               <span class="badge text-bg-light align-self-start mb-2">{{ product.category.name }}</span>
@@ -57,10 +89,9 @@
             @if (product.description) {
               <p class="card-text text-body-secondary small">{{ product.description }}</p>
             }
-            <div class="mt-auto d-flex justify-content-between align-items-center pt-2">
-              <span class="h5 mb-0 fw-bold">{{ product.price | currency }}</span>
-              <button type="button" class="btn btn-primary" (click)="addToCart(product)">
-                <i class="bi bi-cart-plus me-1"></i>
+            <div class="mt-auto pt-2">
+              <button type="button" class="btn btn-primary w-100 add-btn" (click)="addToCart(product)">
+                <i class="bi bi-bag-plus-fill me-1"></i>
                 Add
                 @if (quantityInCart(product.id) > 0) {
                   <span class="badge text-bg-light ms-1">{{ quantityInCart(product.id) }}</span>

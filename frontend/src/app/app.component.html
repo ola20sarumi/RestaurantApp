@@ -1,8 +1,8 @@
-<nav class="navbar navbar-expand bg-white border-bottom sticky-top shadow-sm">
+<nav class="navbar navbar-expand app-navbar sticky-top" data-bs-theme="dark">
   <div class="container">
-    <a class="navbar-brand fw-bold text-brand d-flex align-items-center gap-2" routerLink="/menu">
-      <i class="bi bi-shop"></i>
-      <span>Restaurant</span>
+    <a class="navbar-brand fw-bold d-flex align-items-center gap-2" routerLink="/menu">
+      <span class="brand-mark"><i class="bi bi-fire"></i></span>
+      <span class="brand-name">Restaurant</span>
     </a>
 
     <ul class="navbar-nav ms-auto align-items-center gap-1">
@@ -15,7 +15,10 @@
         <a class="nav-link position-relative" routerLink="/cart" routerLinkActive="active">
           <i class="bi bi-bag me-1"></i><span class="d-none d-sm-inline">Cart</span>
           @if (cart.count() > 0) {
-            <span class="badge rounded-pill bg-primary ms-1">{{ cart.count() }}</span>
+            <!-- Keyed on the count so the badge is re-created, replaying its "pop", on every change. -->
+            @for (count of [cart.count()]; track count) {
+              <span class="badge rounded-pill bg-primary ms-1">{{ count }}</span>
+            }
           }
         </a>
       </li>
@@ -52,9 +55,11 @@
   <router-outlet />
 </main>
 
-<footer class="container border-top py-3 small text-muted d-flex justify-content-between">
-  <span>&copy; {{ year }} Restaurant</span>
-  @if (!auth.session()) {
-    <a class="link-secondary text-decoration-none" routerLink="/login">Staff login</a>
-  }
+<footer class="app-footer small">
+  <div class="container py-3 d-flex justify-content-between">
+    <span>&copy; {{ year }} Restaurant</span>
+    @if (!auth.session()) {
+      <a class="text-decoration-none" routerLink="/login">Staff login</a>
+    }
+  </div>
 </footer>
