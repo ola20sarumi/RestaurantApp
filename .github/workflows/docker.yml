@@ -1,0 +1,66 @@
+name: Docker
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'backend/**', 'frontend/**', 'docker-compose.yml', '.github/workflows/docker.yml' ]
+  pull_request:
+    branches: [ main ]
+    paths: [ 'backend/**', 'frontend/**', 'docker-compose.yml', '.github/workflows/docker.yml' ]
+jobs:
+  compose:
+    # Builds both images and runs the whole stack from docker-compose.yml (SQL Server, migrations, API, SSR site),
+    # then checks it works end to end the way a browser would use it.
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Build and start the stack
+      run: docker compose up --build --detach
+
+    - name: Wait for the API and the site
+      run: |
+        for i in $(seq 1 60); do
+          if curl -fs http://localhost:5044/api/categories > /dev/null && curl -fs http://localhost:4200/menu > /dev/null; then
+            echo "Up after $((i * 5))s"; exit 0
+          fi
+          sleep 5
+        done
+        echo "::error::The API or the site did not start within 5 minutes"
+        exit 1
+
+    - name: Migrations ran and seeded the menu
+      run: |
+        test "$(docker compose ps --all --format '{{.ExitCode}}' migrate)" = "0"
+        curl -fsS http://localhost:5044/api/products | jq -e 'length > 0'
+
+    - name: Staff login works
+      run: |
+        curl -fsS http://localhost:5044/api/auth/login \
+          -H 'Content-Type: application/json' \
+          -d '{"username":"admin","password":"Admin123!"}' \
+          | jq -e '.token | length > 0'
+
+    - name: The site renders the menu on the server
+      # The first dish's name in the server-rendered HTML proves the SSR container reached the API
+      # through API_INTERNAL_URL (http://api:8080/api), not the browser's http://localhost:5044.
+      run: |
+        name=$(curl -fsS http://localhost:5044/api/products | jq -r '.[0].name')
+        html=$(curl -fsS http://localhost:4200/menu)
+        if echo "$html" | grep -q 'Could not load the menu'; then
+          echo "::error::The server could not load the menu from the API"; exit 1
+        fi
+        echo "$html" | grep -qF "$name" || { echo "::error::\"$name\" is missing from the rendered /menu page"; exit 1; }
+
+    - name: The browser's API calls pass CORS
+      run: |
+        curl -fsS -D - -o /dev/null -H 'Origin: http://localhost:4200' http://localhost:5044/api/categories \
+          | grep -i '^access-control-allow-origin: http://localhost:4200'
+
+    - name: Show logs
+      if: failure()
+      run: docker compose logs --no-color
+
+    - name: Stop the stack
+      if: always()
+      run: docker compose down --volumes

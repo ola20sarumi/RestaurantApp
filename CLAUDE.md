@@ -57,6 +57,15 @@ CI (`.github/workflows/playwright.yml` at the repo root, on push/PR to `main`) r
 
 `src/main.server.ts` must pass the `BootstrapContext` through to `bootstrapApplication` (required by Angular 19.2.x patch releases); without it the build fails during route extraction with `NG0401: Missing Platform`. Likewise, SSR only renders for hosts listed in `angular.json` → `build.options.security.allowedHosts` (currently `localhost`, `127.0.0.1`); other hosts silently fall back to client-side rendering — add the production hostname there when deploying.
 
+### Docker (run from the repo root)
+
+```bash
+docker compose up --build          # site → http://localhost:4200, API → http://localhost:5044
+docker compose down -v             # stop and delete the database volume
+```
+
+`docker-compose.yml` runs SQL Server (`db`), a one-off `migrate` service, the API (`api`, container port 8080) and the SSR site (`web`, container port 4000, published on 4200 because that's the origin the Development CORS settings allow). `migrate` runs the EF Core migration bundle built into the API image (`backend/Dockerfile` → `/app/efbundle`), which also seeds the sample menu and staff logins. Compose uses `ASPNETCORE_ENVIRONMENT=Development` (dev JWT key, dev logins), so it's for local use only; the SA password defaults to a dev value and can be overridden with `MSSQL_SA_PASSWORD`. Inside the `web` container `localhost:5044` is the container itself, so the SSR server sends API calls to `API_INTERNAL_URL` (`http://api:8080/api`) instead: `serverApiInterceptor` (`services/server-api.interceptor.ts`) rewrites URLs on the server only, and the browser still uses `API_BASE_URL`.
+
 ### Frontend ↔ API
 
 - The API base URL is the single constant `API_BASE_URL` in `frontend/src/app/api.config.ts` (`http://localhost:5044/api`).
