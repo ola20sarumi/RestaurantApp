@@ -2,6 +2,8 @@
 
 A full-stack restaurant ordering system. Customers browse the menu, build a cart and check out for **dine-in, takeout or delivery**, paying online with **Paystack** or at the counter. Staff sign in to run the kitchen queue, manage the menu and see sales reports.
 
+**[▶ Try the live demo](https://ola20sarumi.github.io/RestaurantApp/)**: runs entirely in your browser, nothing to install.
+
 [![Playwright Tests](https://github.com/ola20sarumi/RestaurantApp/actions/workflows/playwright.yml/badge.svg)](https://github.com/ola20sarumi/RestaurantApp/actions/workflows/playwright.yml)
 ![.NET 10](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet)
 ![Angular 19](https://img.shields.io/badge/Angular-19-DD0031?logo=angular)
@@ -45,7 +47,9 @@ A full-stack restaurant ordering system. Customers browse the menu, build a cart
 
 ## Try the demo
 
-The frontend can be built as a **single, self-contained HTML file** that runs the whole app in the browser, with no API, database or Paystack account needed. The API is replaced by an in-browser stand-in (`frontend/src/demo/`) with a sample menu and two weeks of order history, and everything is saved only in the visitor's browser.
+**Live demo: https://ola20sarumi.github.io/RestaurantApp/**
+
+It's published to GitHub Pages on every push to `main` ([`.github/workflows/pages.yml`](.github/workflows/pages.yml)). The frontend can be built as a **single, self-contained HTML file** that runs the whole app in the browser, with no API, database or Paystack account needed. The API is replaced by an in-browser stand-in (`frontend/src/demo/`) with a sample menu and two weeks of order history, and everything is saved only in the visitor's browser.
 
 ```bash
 cd frontend
@@ -267,9 +271,15 @@ npm run e2e -- tests/checkout.spec.ts
 npx playwright show-report
 ```
 
-Playwright starts the API, the Angular dev server and a **fake Paystack** (`tests/fake-paystack.mjs`) automatically, or reuses ones that are already running.
+Playwright starts the API, the Angular dev server and a **fake Paystack** (`tests/fake-paystack.mjs`) automatically.
 
-> ⚠️ The tests run against your real SQL Server database and **create real orders**.
+The tests never touch your development database. Playwright runs the API against a **separate test database**, `RestaurantDb_E2E` on your local SQL Server, which it creates, migrates and seeds before the run (CI does the same on a throwaway SQL Server container). To put it on another server, set `E2E_CONNECTION_STRING`:
+
+```bash
+E2E_CONNECTION_STRING="Server=localhost,1433;Database=RestaurantDb_E2E;User Id=sa;Password=<password>;TrustServerCertificate=True" npm run e2e
+```
+
+Stop your own API before running the tests. Playwright always starts its own API, so it never reuses one connected to the development database, and it stops with a "port already used" error if port 5044 is taken.
 
 | Spec | Covers |
 |---|---|
@@ -292,7 +302,7 @@ This opens a visible Chrome window that runs the tests and then closes.
 
 ### Continuous integration
 
-[`.github/workflows/playwright.yml`](.github/workflows/playwright.yml) runs the full e2e suite on every push and pull request to `main`, against a throwaway SQL Server 2022 container.
+[`.github/workflows/playwright.yml`](.github/workflows/playwright.yml) runs the full e2e suite on every push and pull request to `main`, against a throwaway SQL Server 2022 container. [`.github/workflows/docker.yml`](.github/workflows/docker.yml) builds and runs the Docker Compose stack, and [`.github/workflows/pages.yml`](.github/workflows/pages.yml) publishes the demo.
 
 ---
 

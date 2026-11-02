@@ -1,6 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
+ * The API under test uses its own database, never the development one: the tests create real orders.
+ * Defaults to RestaurantDb_E2E on the local SQL Server; set E2E_CONNECTION_STRING to use another server.
+ */
+const testConnectionString = process.env['E2E_CONNECTION_STRING']
+  ?? 'Server=localhost;Database=RestaurantDb_E2E;Trusted_Connection=True;TrustServerCertificate=True;';
+
+/**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
@@ -70,7 +77,7 @@ export default defineConfig({
     // },
   ],
 
-  /* Start the API and the Angular dev server before the tests (or reuse ones already running locally). */
+  /* Start the API (always, on the test database) and the Angular dev server (or reuse one already running locally). */
   webServer: [
     {
       // Stands in for Paystack (see tests/fake-paystack.mjs).
@@ -79,13 +86,18 @@ export default defineConfig({
       reuseExistingServer: !process.env['CI'],
     },
     {
-      command: 'dotnet run --project ../backend',
+      // Builds the API, creates or updates the test database (migrations + seed menu and staff logins), then starts
+      // the API on it.
+      command: 'dotnet build ../backend && dotnet ef database update --project ../backend --no-build'
+        + ' && dotnet run --project ../backend --no-build',
       url: 'http://localhost:5044/api/categories',
-      reuseExistingServer: !process.env['CI'],
-      timeout: 120 * 1000,
-      // Point the API at the fake Paystack. An API you started yourself uses your real (test) keys instead,
-      // and the online-payment tests skip themselves.
+      // Never reuse an API that is already running: it would be connected to the development database.
+      // Stop your own API before running the tests.
+      reuseExistingServer: false,
+      timeout: 180 * 1000,
+      // Point the API at the test database and the fake Paystack.
       env: {
+        ConnectionStrings__DefaultConnection: testConnectionString,
         Paystack__BaseUrl: 'http://localhost:5055/',
         Paystack__SecretKey: 'sk_test_fake_for_e2e',
       },

@@ -23,9 +23,9 @@ jobs:
           --health-timeout 5s
           --health-retries 12
     env:
-      # Overrides the Windows-auth connection string in appsettings.json. Development supplies the
-      # JWT key and the seeded staff accounts the tests log in with.
-      ConnectionStrings__DefaultConnection: Server=localhost,1433;Database=RestaurantDb;User Id=sa;Password=Ci_Test_Passw0rd!;TrustServerCertificate=True
+      # The test database (see playwright.config.ts), on the SQL Server container with SQL auth. Development
+      # supplies the JWT key and the seeded staff accounts the tests log in with.
+      E2E_CONNECTION_STRING: Server=localhost,1433;Database=RestaurantDb_E2E;User Id=sa;Password=Ci_Test_Passw0rd!;TrustServerCertificate=True
       ASPNETCORE_ENVIRONMENT: Development
     steps:
     - uses: actions/checkout@v5
@@ -37,12 +37,9 @@ jobs:
         node-version: 22
         cache: npm
         cache-dependency-path: frontend/package-lock.json
-    - name: Create and seed the database
-      working-directory: backend
-      run: |
-        dotnet tool install --global dotnet-ef --version "10.*"
-        dotnet build
-        dotnet ef database update --no-build
+    # Playwright builds the API and runs `dotnet ef database update` on the test database before starting it.
+    - name: Install EF Core tools
+      run: dotnet tool install --global dotnet-ef --version "10.*"
     - name: Install dependencies
       working-directory: frontend
       run: npm ci
