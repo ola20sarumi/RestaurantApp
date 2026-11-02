@@ -1,27 +1,40 @@
 @if (loading()) {
-  <div class="d-flex align-items-center gap-2 text-body-secondary py-5 justify-content-center">
-    <div class="spinner-border spinner-border-sm" role="status"></div>
-    <span>Checking your order…</span>
+  <div class="d-flex flex-column align-items-center gap-3 text-body-secondary py-5">
+    <div class="loading-emoji" aria-hidden="true">🍳</div>
+    <div class="d-flex align-items-center gap-2">
+      <div class="spinner-border spinner-border-sm" role="status"></div>
+      <span>Checking your order…</span>
+    </div>
   </div>
 } @else {
   @let o = order();
   @if (!o) {
-    <div class="text-center text-body-secondary py-5">
-      <i class="bi bi-question-circle display-4 d-block mb-3"></i>
+    <div class="empty-state">
+      <div class="empty-emoji" aria-hidden="true">🤔</div>
       <p role="alert">{{ error() }}</p>
-      <a routerLink="/menu" class="btn btn-primary">Back to Menu</a>
+      <div class="text-body-secondary mb-4">Check the link you got after checkout, or start a new order.</div>
+      <a routerLink="/menu" class="btn btn-primary btn-lg px-4">Back to Menu</a>
     </div>
   } @else if (awaitingPayment()) {
     <!-- Online order whose payment hasn't gone through (cancelled on Paystack, failed, or still processing) -->
-    <div class="card border-0 shadow-sm text-center mx-auto confirmation">
+    <header class="page-hero">
+      <h1 class="h2 mb-0"><i class="bi bi-credit-card-2-front-fill me-2"></i>Almost there</h1>
+      <ol class="steps" aria-label="Order progress">
+        <li class="done"><span class="step-dot"><i class="bi bi-check-lg"></i></span>Cart</li>
+        <li class="active" aria-current="step"><span class="step-dot">2</span>Payment</li>
+        <li><span class="step-dot">3</span>Enjoy</li>
+      </ol>
+    </header>
+
+    <div class="card border-0 text-center mx-auto confirmation">
       <div class="card-body p-4 p-md-5">
-        <i class="bi bi-hourglass-split text-warning display-4 d-block mb-3"></i>
-        <h1 class="h3 fw-bold">Payment not completed</h1>
+        <div class="status-icon pending mb-3" aria-hidden="true"><i class="bi bi-hourglass-split"></i></div>
+        <h2 class="h3 fw-bold">Payment not completed</h2>
         <p class="text-body-secondary mt-2">
           We haven't received payment for order <strong>#{{ o.id }}</strong> yet, so we haven't started preparing it.
           If you've just paid, give it a moment and check again.
         </p>
-        <div class="fs-4 fw-bold my-3">{{ o.totalAmount | currency }}</div>
+        <div class="big-amount my-3">{{ o.totalAmount | currency }}</div>
 
         @if (error()) {
           <div class="alert alert-danger d-flex align-items-center gap-2 text-start" role="alert">
@@ -47,66 +60,104 @@
     </div>
   } @else {
     <!-- Success confirmation: paid online, or to be paid at the counter -->
-    <div class="card border-0 shadow-sm text-center mx-auto confirmation">
-      <div class="card-body p-4 p-md-5">
-        <i class="bi bi-check-circle-fill text-success display-4 d-block mb-3"></i>
-        <h1 class="h3 fw-bold">🎉 Order Placed Successfully!</h1>
-        <p class="lead mt-2">Your Order ID is <strong>#{{ o.id }}</strong>.</p>
-
-        @switch (o.fulfillmentType) {
-          @case ('DineIn') {
-            <p class="text-body-secondary">
-              Thanks, {{ o.customerName }}! Please take a seat — we'll bring your food to your table.
-            </p>
+    <div class="confirmation mx-auto">
+      <div class="card border-0 text-center celebrate">
+        <div class="confetti" aria-hidden="true">
+          @for (piece of confetti; track $index) {
+            <span [style.left.%]="piece.left" [style.background]="piece.color"
+                  [style.animation-delay.s]="piece.delay" [style.rotate.deg]="piece.rotate"></span>
           }
-          @case ('Takeout') {
-            <p class="text-body-secondary">
-              Thanks, {{ o.customerName }}! We'll have it ready at the counter. Just give us your order number.
-            </p>
-          }
-          @default {
-            <p class="text-body-secondary">
-              Thanks, {{ o.customerName }}! We have received your details and are preparing your order.
-            </p>
-          }
-        }
-
-        <div class="d-flex flex-wrap justify-content-center gap-4 my-4">
-          <div>
-            <div class="small text-body-secondary">Total</div>
-            <div class="fs-5 fw-bold">{{ o.totalAmount | currency }}</div>
-          </div>
-          <div>
-            <div class="small text-body-secondary">Order type</div>
-            <div class="fs-5 fw-bold">
-              @if (fulfillmentOption(); as option) {
-                <i [class]="'bi me-1 ' + option.icon"></i>{{ option.label }}
-              }
-            </div>
-          </div>
-          <div>
-            <div class="small text-body-secondary">Status</div>
-            <div class="fs-5"><span class="badge text-bg-warning order-status">{{ o.status }}</span></div>
-          </div>
-          <div>
-            <div class="small text-body-secondary">Payment</div>
-            <div class="fs-5">
-              @if (o.paymentStatus === 'Paid') {
-                <span class="badge text-bg-success payment-status"><i class="bi bi-check-lg me-1"></i>Paid</span>
-              } @else {
-                <span class="badge text-bg-light payment-status">Pay at the counter</span>
-              }
-            </div>
-          </div>
         </div>
 
-        <ul class="list-unstyled small text-body-secondary mb-4">
+        <div class="card-body p-4 p-md-5">
+          <div class="status-icon success mb-3" aria-hidden="true"><i class="bi bi-check-lg"></i></div>
+          <h1 class="celebrate-title">🎉 Order Placed Successfully!</h1>
+          <p class="order-id mt-3 mb-2">Your Order ID is <strong>#{{ o.id }}</strong></p>
+
+          @switch (o.fulfillmentType) {
+            @case ('DineIn') {
+              <p class="text-body-secondary thanks">
+                Thanks, {{ o.customerName }}! Please take a seat — we'll bring your food to your table.
+              </p>
+            }
+            @case ('Takeout') {
+              <p class="text-body-secondary thanks">
+                Thanks, {{ o.customerName }}! We'll have it ready at the counter. Just give us your order number.
+              </p>
+            }
+            @default {
+              <p class="text-body-secondary thanks">
+                Thanks, {{ o.customerName }}! We have received your details and are preparing your order.
+              </p>
+            }
+          }
+
+          <!-- Kitchen progress at the time the page loaded -->
+          @if (progressIndex() >= 0) {
+            <ol class="tracker mt-4 mb-2" aria-label="Order progress">
+              @for (step of progressSteps; track step.status; let i = $index) {
+                <li [class.done]="i < progressIndex()" [class.current]="i === progressIndex()"
+                    [attr.aria-current]="i === progressIndex() ? 'step' : null">
+                  <span class="tracker-dot"><i [class]="'bi ' + step.icon"></i></span>
+                  <span class="tracker-label">{{ step.label }}</span>
+                </li>
+              }
+            </ol>
+          }
+          <button type="button" class="btn btn-link btn-sm" (click)="refresh()" [disabled]="checking()">
+            <i class="bi bi-arrow-clockwise me-1"></i>Refresh status
+          </button>
+          @if (error()) {
+            <div class="small text-danger" role="alert">{{ error() }}</div>
+          }
+
+          <div class="info-grid my-4">
+            <div class="info-tile">
+              <i class="bi bi-wallet2"></i>
+              <div class="small text-body-secondary">Total</div>
+              <div class="fw-bold">{{ o.totalAmount | currency }}</div>
+            </div>
+            <div class="info-tile">
+              <i [class]="'bi ' + (fulfillmentOption()?.icon ?? 'bi-bag')"></i>
+              <div class="small text-body-secondary">Order type</div>
+              <div class="fw-bold">{{ fulfillmentOption()?.label }}</div>
+            </div>
+            <div class="info-tile">
+              <i class="bi bi-activity"></i>
+              <div class="small text-body-secondary">Status</div>
+              <div><span class="badge rounded-pill order-status" [class]="'status-' + o.status.toLowerCase()">{{ o.status }}</span></div>
+            </div>
+            <div class="info-tile">
+              <i class="bi bi-credit-card"></i>
+              <div class="small text-body-secondary">Payment</div>
+              <div>
+                @if (o.paymentStatus === 'Paid') {
+                  <span class="badge rounded-pill text-bg-success payment-status"><i class="bi bi-check-lg me-1"></i>Paid</span>
+                } @else {
+                  <span class="badge rounded-pill text-bg-light payment-status">Pay at the counter</span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <a routerLink="/menu" class="btn btn-primary btn-lg px-4">Back to Menu</a>
+        </div>
+      </div>
+
+      <div class="card receipt p-4 mt-4">
+        <h2 class="h5 mb-3">Your order</h2>
+        <ul class="list-group list-group-flush mb-3">
           @for (item of o.items; track $index) {
-            <li>{{ item.quantity }} × {{ item.name }}</li>
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span><span class="qty-chip">{{ item.quantity }}×</span>{{ item.name }}</span>
+              <span class="fw-semibold">{{ item.unitPrice * item.quantity | currency }}</span>
+            </li>
           }
         </ul>
-
-        <a routerLink="/menu" class="btn btn-primary btn-lg">Back to Menu</a>
+        <div class="receipt-total">
+          <span>Total</span>
+          <span class="amount">{{ o.totalAmount | currency }}</span>
+        </div>
       </div>
     </div>
   }

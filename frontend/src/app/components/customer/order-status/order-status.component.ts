@@ -8,6 +8,16 @@ import { CartService } from '../../../services/cart.service';
 import { PaymentService } from '../../../services/payment.service';
 import { describeApiError } from '../../../services/api-error';
 
+/** The kitchen's progress shown on the confirmation, in order (statuses from ORDER_STATUSES; Cancelled is shown apart). */
+const PROGRESS_STEPS = [
+  { status: 'Pending', label: 'Received', icon: 'bi-receipt' },
+  { status: 'Preparing', label: 'Cooking', icon: 'bi-fire' },
+  { status: 'Ready', label: 'Ready', icon: 'bi-bell-fill' },
+  { status: 'Completed', label: 'Enjoy!', icon: 'bi-emoji-heart-eyes' },
+];
+
+const CONFETTI_COLORS = ['#ff4a1c', '#ffc531', '#ff2e7e', '#7c3aed'];
+
 /**
  * The customer's order page (/order/:orderRef). Checkout sends pay-at-counter orders here, and Paystack sends
  * customers back here after paying (adding ?trxref=...). The API checks the payment with Paystack before saying
@@ -42,6 +52,18 @@ export class OrderStatusComponent implements OnInit {
     const order = this.order();
     return order?.paymentMethod === 'Online' && order.paymentStatus === 'Unpaid';
   });
+
+  readonly progressSteps = PROGRESS_STEPS;
+  /** How far along the order is in progressSteps (-1 for Cancelled). */
+  readonly progressIndex = computed(() => PROGRESS_STEPS.findIndex(s => s.status === this.order()?.status));
+
+  /** Pieces for the confetti burst on the confirmation (fixed values, so server and browser render the same). */
+  readonly confetti = Array.from({ length: 24 }, (_, i) => ({
+    left: (i * 37 + 5) % 100,
+    delay: (i % 8) * 0.12,
+    rotate: (i * 47) % 360,
+    color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+  }));
 
   ngOnInit(): void {
     this.refresh();
