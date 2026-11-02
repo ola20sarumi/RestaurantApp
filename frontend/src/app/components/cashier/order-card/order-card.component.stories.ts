@@ -1,5 +1,5 @@
 import { componentWrapperDecorator, type Meta, type StoryObj } from '@storybook/angular';
-import { fn } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { demoOrder } from '../../../../stories/demo-fixtures';
 import { OrderCardComponent } from './order-card.component';
@@ -9,6 +9,8 @@ const meta: Meta<OrderCardComponent> = {
   title: 'Cashier/OrderCard',
   component: OrderCardComponent,
   decorators: [componentWrapperDecorator(story => `<div style="max-width: 560px">${story}</div>`)],
+  // Outputs are actions: the fn() spies below record what the component emits (shown in the Actions panel).
+  argTypes: { statusChange: { action: 'statusChange' }, markPaid: { action: 'markPaid' } },
   args: {
     order: demoOrder(66),
     statusChange: fn(),
@@ -21,8 +23,19 @@ type Story = StoryObj<OrderCardComponent>;
 
 // Every kitchen status.
 
-/** A takeout order to be paid at the counter, just placed. */
-export const Pending: Story = { args: { order: demoOrder(66) } };
+/** A takeout order to be paid at the counter, just placed. Moving it on emits the status clicked. */
+export const Pending: Story = {
+  args: { order: demoOrder(66) },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('button', { name: 'Pending' })).toBeDisabled();
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Preparing' }));
+
+    await expect(args.statusChange).toHaveBeenCalledOnce();
+    await expect(args.statusChange).toHaveBeenCalledWith('Preparing');
+  }
+};
 
 export const Preparing: Story = { args: { order: demoOrder(64) } };
 
@@ -39,14 +52,26 @@ export const Cancelled: Story = { args: { order: demoOrder(53) } };
 // Paystack has confirmed them, so an unpaid order is always one to be paid at the counter.
 
 /** A delivery order paid online: address and phone shown, no "Mark as paid". */
-export const PaidOnline: Story = { args: { order: demoOrder(65) } };
+export const PaidOnline: Story = {
+  args: { order: demoOrder(65) },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText('Paid online')).toBeVisible();
+    await expect(canvas.queryByRole('button', { name: 'Mark as paid' })).toBeNull();
+  }
+};
 
 /** An eat-in order paid at the counter. */
 export const PaidAtCounter: Story = { args: { order: demoOrder(57) } };
 
 /** Served but not paid yet: the cashier can mark it paid. */
 export const UnpaidAtCounter: Story = {
-  args: { order: demoOrder(57, { status: 'Ready', paymentStatus: 'Unpaid', paidAt: null }) }
+  args: { order: demoOrder(57, { status: 'Ready', paymentStatus: 'Unpaid', paidAt: null }) },
+  play: async ({ args, canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Mark as paid' }));
+
+    await expect(args.markPaid).toHaveBeenCalledOnce();
+  }
 };
 
 /** An eat-in guest who gave no name. */

@@ -1,5 +1,5 @@
 import { componentWrapperDecorator, type Meta, type StoryObj } from '@storybook/angular';
-import { fn } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { demoProduct } from '../../../../stories/demo-fixtures';
 import { ProductCardComponent } from './product-card.component';
@@ -8,6 +8,8 @@ const meta: Meta<ProductCardComponent> = {
   title: 'Customer/ProductCard',
   component: ProductCardComponent,
   decorators: [componentWrapperDecorator(story => `<div style="width: 340px">${story}</div>`)],
+  // Outputs are actions: the fn() spies below record what the component emits (shown in the Actions panel).
+  argTypes: { add: { action: 'add' } },
   args: {
     product: demoProduct('Margherita Pizza'),
     quantityInCart: 0,
@@ -19,11 +21,22 @@ const meta: Meta<ProductCardComponent> = {
 export default meta;
 type Story = StoryObj<ProductCardComponent>;
 
-export const Available: Story = {};
+/** Clicking "Add" hands the product to the page, which puts it in the cart. */
+export const Available: Story = {
+  play: async ({ args, canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: /Add/ }));
+
+    await expect(args.add).toHaveBeenCalledOnce();
+    await expect(args.add).toHaveBeenCalledWith(args.product);
+  }
+};
 
 /** The button counts how many are already in the cart. */
 export const AlreadyInCart: Story = {
-  args: { quantityInCart: 2 }
+  args: { quantityInCart: 2 },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('button', { name: /Add/ })).toHaveTextContent('Add 2');
+  }
 };
 
 /** A dish without a photo gets a placeholder. */

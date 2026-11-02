@@ -11,6 +11,7 @@
     "e2e": "playwright test",
     "storybook": "ng run frontend:storybook",
     "build-storybook": "ng run frontend:build-storybook",
+    "test-storybook": "node scripts/test-storybook.mjs",
     "serve:ssr:frontend": "node dist/frontend/server/server.mjs"
   },
   "private": true,
@@ -38,6 +39,7 @@
     "@playwright/test": "^1.63.0",
     "@storybook/addon-docs": "^10.6.5",
     "@storybook/angular": "^10.6.5",
+    "@storybook/test-runner": "^0.26.0",
     "@types/express": "^4.17.17",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^18.18.0",

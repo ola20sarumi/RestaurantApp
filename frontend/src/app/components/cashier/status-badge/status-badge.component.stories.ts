@@ -1,4 +1,5 @@
 import { type Meta, type StoryObj } from '@storybook/angular';
+import { expect, within } from 'storybook/test';
 
 import { ORDER_STATUSES } from '../../../models/restaurant.models';
 import { StatusBadgeComponent } from './status-badge.component';
@@ -31,5 +32,13 @@ export const AllStatuses: Story = {
           <app-status-badge [status]="status" />
         }
       </div>`
-  })
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText('Pending')).toHaveClass('text-bg-warning');
+    await expect(canvas.getByText('Preparing')).toHaveClass('text-bg-info');
+    await expect(canvas.getByText('Ready')).toHaveClass('text-bg-success');
+    await expect(canvas.getByText('Completed')).toHaveClass('text-bg-secondary');
+    await expect(canvas.getByText('Cancelled')).toHaveClass('text-bg-danger');
+  }
 };
