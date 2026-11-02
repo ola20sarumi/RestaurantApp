@@ -204,11 +204,11 @@ public class PaymentsController : ControllerBase
     // Transaction references are "{order reference}-{attempt}".
     private static string OrderReferenceOf(string transactionReference) => transactionReference.Split('-')[0];
 
-    // Paystack amounts are in the subunit (kobo); order totals have 2 decimals.
     // Paystack requires an email; customers who paid by phone get a placeholder built from their number.
     private string PayerEmail(Order order) => order.CustomerEmail
         ?? $"{new string(order.CustomerPhone.Where(char.IsDigit).ToArray())}@{_options.PhoneOnlyEmailDomain}";
 
+    // Paystack amounts are in the subunit (kobo); order totals have 2 decimals.
     private static long ToSubunits(decimal amount) => (long)decimal.Round(amount * 100, MidpointRounding.AwayFromZero);
 
     private record PaystackEvent(string Event, PaystackTransaction? Data);

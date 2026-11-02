@@ -70,7 +70,7 @@ export interface CreateOrderRequest {
   items: { productId: number; quantity: number }[];
 }
 
-/** GET /api/orders/track/:reference — the customer's view of their order (no contact details). */
+/** POST /api/payments/:reference/verify — the customer's view of their order (no contact details). */
 export interface OrderTracking {
   id: number;
   reference: string;

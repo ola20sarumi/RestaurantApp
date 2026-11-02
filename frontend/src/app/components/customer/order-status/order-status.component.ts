@@ -57,7 +57,7 @@ export class OrderStatusComponent implements OnInit {
   /** How far along the order is in progressSteps (-1 for Cancelled). */
   readonly progressIndex = computed(() => PROGRESS_STEPS.findIndex(s => s.status === this.order()?.status));
 
-  /** Pieces for the confetti burst on the confirmation (fixed values, so server and browser render the same). */
+  /** Pieces for the confetti burst on the confirmation (fixed values, so every visit looks the same). */
   readonly confetti = Array.from({ length: 24 }, (_, i) => ({
     left: (i * 37 + 5) % 100,
     delay: (i % 8) * 0.12,

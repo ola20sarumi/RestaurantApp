@@ -12,7 +12,7 @@ export class OrderService {
   private readonly http = inject(HttpClient);
   private readonly url = `${API_BASE_URL}/orders`;
 
-  /** All orders, newest first; optionally filtered by status (e.g. "Pending"). */
+  /** Orders, newest first (online ones only once paid); optionally filtered by status (e.g. "Pending"). */
   getOrders(status?: string): Observable<Order[]> {
     const params = status ? new HttpParams().set('status', status) : undefined;
     return this.http.get<Order[]>(this.url, { params });

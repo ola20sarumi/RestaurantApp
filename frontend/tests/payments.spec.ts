@@ -14,7 +14,7 @@ import {
 // Online payment runs against the fake Paystack in tests/fake-paystack.mjs (see playwright.config.ts).
 test.describe('Online payment (Paystack)', () => {
   test.beforeEach(async ({ request }) => {
-    test.skip(!(await usesFakePaystack(request)), 'The API was not started by Playwright, so it is not using the fake Paystack');
+    test.skip(!(await usesFakePaystack(request)), 'The API is not using the fake Paystack');
   });
 
   async function checkoutAsDelivery(page: import('@playwright/test').Page, customer: string) {

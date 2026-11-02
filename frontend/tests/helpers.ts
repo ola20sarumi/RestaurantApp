@@ -69,8 +69,8 @@ export const FAKE_PAYSTACK_URL = 'http://localhost:5055/';
 export const FAKE_PAYSTACK_SECRET = 'sk_test_fake_for_e2e';
 
 /**
- * True when the API talks to the fake Paystack. Not the case when Playwright reused an API you started yourself
- * (it uses your own keys), so the online-payment tests skip themselves then.
+ * True when the API talks to the fake Paystack. The API that Playwright starts always does; this is a safeguard so the
+ * online-payment tests skip themselves instead of creating transactions with real Paystack keys.
  */
 export async function usesFakePaystack(request: APIRequestContext): Promise<boolean> {
   const order = await createOnlineOrderViaApi(request, uniqueName('Paystack check'));
