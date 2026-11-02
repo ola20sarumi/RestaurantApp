@@ -1,12 +1,12 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 
-import { FULFILLMENT_OPTIONS, ORDER_STATUSES, Order } from '../../../models/restaurant.models';
+import { ORDER_STATUSES, Order, OrderStatus } from '../../../models/restaurant.models';
 import { OrderService } from '../../../services/order.service';
+import { OrderCardComponent } from '../order-card/order-card.component';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CurrencyPipe, DatePipe],
+  imports: [OrderCardComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
@@ -43,20 +43,6 @@ export class DashboardComponent implements OnInit {
     this.loadOrders();
   }
 
-  fulfillmentOption(type: string) {
-    return FULFILLMENT_OPTIONS.find(o => o.value === type);
-  }
-
-  badgeClass(status: string): string {
-    switch (status) {
-      case 'Pending': return 'text-bg-warning';
-      case 'Preparing': return 'text-bg-info';
-      case 'Ready': return 'text-bg-success';
-      case 'Cancelled': return 'text-bg-danger';
-      default: return 'text-bg-secondary';
-    }
-  }
-
   markPaid(order: Order): void {
     this.orderService.markPaid(order.id).subscribe({
       next: () => this.loadOrders(),
@@ -64,7 +50,7 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  setStatus(order: Order, status: string): void {
+  setStatus(order: Order, status: OrderStatus): void {
     this.orderService.updateOrderStatus(order.id, status).subscribe({
       next: () => this.loadOrders(),
       error: () => this.error.set(`Could not update order #${order.id}.`)

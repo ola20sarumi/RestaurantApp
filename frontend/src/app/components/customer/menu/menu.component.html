@@ -70,36 +70,8 @@
   <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
     @for (product of filteredProducts(); track product.id; let i = $index) {
       <div class="col">
-        <div class="card h-100 border-0 product-card" [style.animation-delay.ms]="i * 60">
-          <div class="product-media">
-            @if (product.imageUrl) {
-              <img [src]="product.imageUrl" class="card-img-top product-img" [alt]="product.name" loading="lazy">
-            } @else {
-              <div class="card-img-top product-img placeholder-img d-flex align-items-center justify-content-center">
-                <i class="bi bi-egg-fried"></i>
-              </div>
-            }
-            <span class="price-tag">{{ product.price | currency }}</span>
-          </div>
-          <div class="card-body d-flex flex-column">
-            @if (product.category) {
-              <span class="badge text-bg-light align-self-start mb-2">{{ product.category.name }}</span>
-            }
-            <h5 class="card-title mb-1">{{ product.name }}</h5>
-            @if (product.description) {
-              <p class="card-text text-body-secondary small">{{ product.description }}</p>
-            }
-            <div class="mt-auto pt-2">
-              <button type="button" class="btn btn-primary w-100 add-btn" (click)="addToCart(product)">
-                <i class="bi bi-bag-plus-fill me-1"></i>
-                Add
-                @if (quantityInCart(product.id) > 0) {
-                  <span class="badge text-bg-light ms-1">{{ quantityInCart(product.id) }}</span>
-                }
-              </button>
-            </div>
-          </div>
-        </div>
+        <app-product-card [product]="product" [quantityInCart]="quantityInCart(product.id)" [animationDelay]="i * 60"
+                          (add)="addToCart($event)" />
       </div>
     }
   </div>

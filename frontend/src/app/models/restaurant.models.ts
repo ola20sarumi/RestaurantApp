@@ -93,6 +93,7 @@ export interface CartItem {
 }
 
 export const ORDER_STATUSES = ['Pending', 'Preparing', 'Ready', 'Completed', 'Cancelled'] as const;
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 // Bodies for the admin endpoints (POST/PUT /api/categories and /api/products).
 export interface CategoryRequest {

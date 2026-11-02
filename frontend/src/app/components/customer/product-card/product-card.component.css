@@ -1,0 +1,61 @@
+/* Fills its grid column, so cards in a row have equal heights. */
+:host {
+  display: block;
+  height: 100%;
+}
+
+.product-card {
+  overflow: hidden;
+  animation: rise 0.5s ease both;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-6px) rotate(-0.4deg);
+  box-shadow: 0 1.25rem 2.5rem rgba(255, 74, 28, 0.22) !important;
+}
+
+.product-media {
+  position: relative;
+  overflow: hidden;
+}
+
+.product-img {
+  height: 210px;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.product-card:hover .product-img {
+  transform: scale(1.08);
+}
+
+.price-tag {
+  position: absolute;
+  right: 0.85rem;
+  bottom: 0.85rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--night);
+  font-family: var(--display-font);
+  font-weight: 800;
+  font-size: 1.1rem;
+  box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.25);
+  transform: rotate(-3deg);
+}
+
+.placeholder-img {
+  background: linear-gradient(135deg, var(--accent-soft), var(--brand-soft));
+  color: var(--brand);
+  font-size: 3rem;
+}
+
+.add-btn {
+  padding-block: 0.6rem;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}

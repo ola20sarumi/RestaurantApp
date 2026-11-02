@@ -1,0 +1,30 @@
+<div class="card h-100 border-0 product-card" [style.animation-delay.ms]="animationDelay()">
+  <div class="product-media">
+    @if (product().imageUrl) {
+      <img [src]="product().imageUrl" class="card-img-top product-img" [alt]="product().name" loading="lazy">
+    } @else {
+      <div class="card-img-top product-img placeholder-img d-flex align-items-center justify-content-center">
+        <i class="bi bi-egg-fried"></i>
+      </div>
+    }
+    <span class="price-tag">{{ product().price | currency }}</span>
+  </div>
+  <div class="card-body d-flex flex-column">
+    @if (product().category) {
+      <span class="badge text-bg-light align-self-start mb-2">{{ product().category?.name }}</span>
+    }
+    <h5 class="card-title mb-1">{{ product().name }}</h5>
+    @if (product().description) {
+      <p class="card-text text-body-secondary small">{{ product().description }}</p>
+    }
+    <div class="mt-auto pt-2">
+      <button type="button" class="btn btn-primary w-100 add-btn" (click)="add.emit(product())">
+        <i class="bi bi-bag-plus-fill me-1"></i>
+        Add
+        @if (quantityInCart() > 0) {
+          <span class="badge text-bg-light ms-1">{{ quantityInCart() }}</span>
+        }
+      </button>
+    </div>
+  </div>
+</div>

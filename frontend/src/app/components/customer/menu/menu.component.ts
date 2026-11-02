@@ -1,13 +1,13 @@
-import { CurrencyPipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 
 import { CartService } from '../../../services/cart.service';
 import { ProductService } from '../../../services/product.service';
 import { Category, Product } from '../../../models/restaurant.models';
+import { ProductCardComponent } from '../product-card/product-card.component';
 
 @Component({
   selector: 'app-menu',
-  imports: [CurrencyPipe],
+  imports: [ProductCardComponent],
   templateUrl: './menu.component.html',
   styleUrl: './menu.component.css',
 })

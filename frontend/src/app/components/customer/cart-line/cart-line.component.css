@@ -1,0 +1,74 @@
+:host(.cart-row) {
+  padding: 1rem 1.25rem;
+  transition: background-color 0.2s ease;
+  animation: slide-in 0.4s ease both;
+}
+
+:host(.cart-row:hover) {
+  background-color: #fffaf4;
+}
+
+.dish-name {
+  font-family: var(--display-font);
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+/* Pill-shaped quantity stepper. */
+.qty {
+  width: 124px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+}
+
+.qty .btn {
+  --bs-btn-color: var(--brand-dark);
+  --bs-btn-bg: #fff;
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-bg: var(--brand);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-border-color: transparent;
+  --bs-btn-active-bg: var(--brand-dark);
+  --bs-btn-active-color: #fff;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-radius: 50% !important;
+  box-shadow: 0 0.15rem 0.4rem rgba(27, 11, 46, 0.1);
+}
+
+.qty .input-group-text {
+  flex: 1;
+  min-width: 40px;
+  border: 0;
+  background: transparent;
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.subtotal {
+  min-width: 90px;
+  font-family: var(--display-font);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--brand-dark);
+}
+
+.remove-btn {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  color: #b4a7bd;
+}
+
+.remove-btn:hover {
+  background: #ffe3e3;
+  color: #dc3545;
+}
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: none; }
+}
