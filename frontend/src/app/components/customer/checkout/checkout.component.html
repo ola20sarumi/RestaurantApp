@@ -1,27 +1,35 @@
-<h1 class="h3 fw-bold mb-4"><i class="bi bi-credit-card me-2 text-brand"></i>Checkout</h1>
+<header class="page-hero">
+  <h1><i class="bi bi-lightning-charge-fill me-2"></i>Checkout</h1>
+  <ol class="steps" aria-label="Order progress">
+    <li class="done"><span class="step-dot"><i class="bi bi-check-lg"></i></span>Cart</li>
+    <li class="active" aria-current="step"><span class="step-dot">2</span>Checkout</li>
+    <li><span class="step-dot">3</span>Enjoy</li>
+  </ol>
+</header>
 
 @if (cart.items().length === 0) {
-  <div class="text-center text-body-secondary py-5">
-    <i class="bi bi-bag-x display-4 d-block mb-3"></i>
+  <div class="empty-state">
+    <div class="empty-emoji" aria-hidden="true">🛍️</div>
     <p>Your cart is empty.</p>
-    <a routerLink="/menu" class="btn btn-primary">Browse the menu</a>
+    <div class="text-body-secondary mb-4">Add a few dishes first, then come back to check out.</div>
+    <a routerLink="/menu" class="btn btn-primary btn-lg px-4">Browse the menu</a>
   </div>
 } @else {
   <div class="row g-4">
     <!-- Form section -->
     <div class="col-md-7">
-      <div class="card border-0 shadow-sm p-4">
+      <div class="card border-0 checkout-card">
         <form #checkoutForm="ngForm" (ngSubmit)="submitOrder(checkoutForm)" novalidate>
           <!-- Step 1: order type -->
-          <fieldset class="mb-4">
-            <legend class="h5 mb-3">How would you like your order?</legend>
+          <fieldset class="checkout-step">
+            <legend class="step-title"><span class="step-num" aria-hidden="true">1</span>How would you like your order?</legend>
             <div class="row row-cols-1 row-cols-sm-3 g-2">
               @for (option of fulfillmentOptions; track option.value) {
                 <div class="col">
                   <input type="radio" class="btn-check" name="fulfillmentType" [id]="'type-' + option.value"
                          [value]="option.value" [ngModel]="fulfillmentType" (ngModelChange)="selectOrderType($event)">
                   <label class="btn btn-outline-primary w-100 h-100 py-3 order-type" [for]="'type-' + option.value">
-                    <i [class]="'bi d-block fs-3 mb-1 ' + option.icon"></i>
+                    <span class="type-icon"><i [class]="'bi ' + option.icon"></i></span>
                     <span class="fw-semibold d-block">{{ option.label }}</span>
                     <small class="hint d-block">{{ option.hint }}</small>
                   </label>
@@ -35,7 +43,9 @@
 
           <!-- Step 2: customer details — name always; phone for takeout/delivery; address for delivery -->
           @if (fulfillmentType) {
-            <h2 class="h5 mb-3">
+            <div class="checkout-step">
+            <h2 class="step-title">
+              <span class="step-num" aria-hidden="true">2</span>
               @switch (fulfillmentType) {
                 @case ('DineIn') {
                   Your name
@@ -87,9 +97,11 @@
               </div>
             }
 
+            </div>
+
             <!-- Step 3: payment — online with Paystack, or at the counter (not for delivery) -->
-            <fieldset class="mt-4 mb-3">
-              <legend class="h5 mb-3">Payment</legend>
+            <fieldset class="checkout-step">
+              <legend class="step-title"><span class="step-num" aria-hidden="true">3</span>Payment</legend>
               @if (fulfillmentType === 'Delivery') {
                 <p class="small text-body-secondary">
                   <i class="bi bi-shield-lock me-1"></i>Delivery orders are paid online before we start cooking.
@@ -159,7 +171,7 @@
             </div>
           }
 
-          <button type="submit" class="btn btn-primary btn-lg w-100 mt-2" [disabled]="isSubmitting()">
+          <button type="submit" class="btn btn-primary btn-lg w-100 mt-2 submit-btn" [disabled]="isSubmitting()">
             @if (isSubmitting()) {
               <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
               {{ paysOnline ? 'Taking you to Paystack…' : 'Submitting Order…' }}
@@ -175,23 +187,29 @@
 
     <!-- Order summary sidebar -->
     <div class="col-md-5">
-      <div class="card border-0 shadow-sm p-4">
-        <h2 class="h5 mb-3">Order Summary</h2>
+      <div class="card receipt p-4 summary-sticky">
+        <h2 class="h4 mb-3">Order Summary</h2>
         <ul class="list-group list-group-flush mb-3">
           @for (item of cart.items(); track item.product.id) {
-            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-              <div>
+            <li class="list-group-item d-flex align-items-center gap-3 px-0 py-3">
+              @if (item.product.imageUrl) {
+                <img class="dish-thumb sm" [src]="item.product.imageUrl" alt="" loading="lazy">
+              } @else {
+                <span class="dish-thumb sm"><i class="bi bi-egg-fried"></i></span>
+              }
+              <div class="flex-grow-1">
                 <div class="fw-semibold">{{ item.product.name }}</div>
-                <small class="text-body-secondary">Qty: {{ item.quantity }} × {{ item.product.price | currency }}</small>
+                <small class="muted">Qty: {{ item.quantity }} × {{ item.product.price | currency }}</small>
               </div>
               <span class="fw-bold">{{ item.product.price * item.quantity | currency }}</span>
             </li>
           }
         </ul>
-        <div class="d-flex justify-content-between fs-5 fw-bold border-top pt-3">
+        <div class="receipt-total">
           <span>Total:</span>
-          <span>{{ cart.total() | currency }}</span>
+          <span class="amount">{{ cart.total() | currency }}</span>
         </div>
+        <div class="receipt-note"><i class="bi bi-shield-check"></i>Secure payment with Paystack, or pay at the counter.</div>
         <a routerLink="/cart" class="btn btn-link px-0 mt-2 align-self-start"><i class="bi bi-arrow-left me-1"></i>Edit cart</a>
       </div>
     </div>

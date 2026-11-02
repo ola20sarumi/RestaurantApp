@@ -196,6 +196,222 @@ h1, h2, h3, h4, .h1, .h2, .h3, .h4, .display-6, .navbar-brand, .card-title {
   color: var(--brand);
 }
 
+/* ---------- Shared customer-page pieces (cart, checkout) ---------- */
+
+/* Plum page header with the page title and the order steps. */
+.page-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+  padding: 1.5rem clamp(1.25rem, 4vw, 2.25rem);
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at 95% 0%, rgba(255, 74, 28, 0.6), transparent 45%),
+    radial-gradient(circle at 70% 130%, rgba(255, 46, 126, 0.45), transparent 45%),
+    var(--night);
+  color: #fff;
+  box-shadow: 0 1rem 2.25rem rgba(27, 11, 46, 0.2);
+}
+
+.page-hero h1 {
+  margin: 0;
+  font-size: clamp(1.75rem, 4vw, 2.4rem);
+}
+
+.page-hero h1 i {
+  color: var(--accent);
+}
+
+.steps {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.steps li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.steps li + li::before {
+  content: "";
+  width: 1.5rem;
+  height: 2px;
+  margin-right: 0.15rem;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.steps .step-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.steps .done {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.steps .done .step-dot {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--night);
+}
+
+.steps .active {
+  color: #fff;
+}
+
+.steps .active .step-dot {
+  border-color: transparent;
+  background: var(--gradient-hot);
+  box-shadow: 0 0 0.9rem rgba(255, 46, 126, 0.7);
+}
+
+/* Dark "receipt" card for order summaries. */
+.receipt {
+  position: relative;
+  overflow: hidden;
+  border: 0;
+  border-radius: 1.4rem;
+  background: var(--night);
+  color: #fff;
+  box-shadow: 0 1.25rem 2.5rem rgba(27, 11, 46, 0.28);
+}
+
+.receipt::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--accent), var(--brand), var(--pink));
+}
+
+.receipt .text-body-secondary,
+.receipt .muted {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Set on .list-group itself, because the global .list-group rule above gives it a white background. */
+.receipt .list-group {
+  --bs-list-group-bg: transparent;
+  --bs-list-group-color: #fff;
+  --bs-list-group-border-color: rgba(255, 255, 255, 0.15);
+}
+
+.receipt .list-group-item {
+  border-bottom-style: dashed;
+}
+
+.receipt .btn-link {
+  --bs-btn-color: var(--accent);
+  --bs-btn-hover-color: #fff;
+}
+
+.receipt-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-top: 1rem;
+  border-top: 2px dashed rgba(255, 255, 255, 0.25);
+  font-family: var(--display-font);
+  font-weight: 800;
+}
+
+.receipt-total .amount {
+  font-size: 1.9rem;
+  background: var(--gradient-sun);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.receipt-note {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.8rem;
+  background: rgba(255, 197, 49, 0.12);
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Small dish photo in cart and summary rows. */
+.dish-thumb {
+  flex-shrink: 0;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.9rem;
+  object-fit: cover;
+  background: linear-gradient(135deg, var(--accent-soft), var(--brand-soft));
+  color: var(--brand);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+
+.dish-thumb.sm {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 0.7rem;
+  font-size: 1.1rem;
+}
+
+/* Friendly empty state with a bouncing emoji. */
+.empty-state {
+  max-width: 26rem;
+  margin: 1rem auto 0;
+  padding: 3rem 1.5rem;
+  border-radius: 1.5rem;
+  background: #fff;
+  text-align: center;
+  box-shadow: 0 0.6rem 1.75rem rgba(27, 11, 46, 0.08);
+}
+
+.empty-state .empty-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 6rem;
+  height: 6rem;
+  margin-bottom: 1.25rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-soft), var(--brand-soft));
+  font-size: 3rem;
+  animation: bounce-soft 2.2s ease-in-out infinite;
+}
+
+.empty-state p {
+  font-family: var(--display-font);
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+}
+
+@keyframes bounce-soft {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-10px) rotate(4deg); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
