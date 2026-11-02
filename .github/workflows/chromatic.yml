@@ -1,0 +1,80 @@
+name: Storybook & Chromatic
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'frontend/**', '.github/workflows/chromatic.yml' ]
+  pull_request:
+    branches: [ main ]
+    paths: [ 'frontend/**', '.github/workflows/chromatic.yml' ]
+jobs:
+  interaction-tests:
+    # Builds Storybook and runs every story's play function headless (npm run test-storybook).
+    # Needs no secrets, so it also runs on pull requests from forks.
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+    - uses: actions/setup-node@v5
+      with:
+        node-version: 22
+        cache: npm
+        cache-dependency-path: frontend/package-lock.json
+    - name: Install dependencies
+      working-directory: frontend
+      run: npm ci
+    - name: Install Playwright Chromium
+      working-directory: frontend
+      run: npx playwright install --with-deps chromium
+    - name: Build Storybook
+      working-directory: frontend
+      run: npm run build-storybook
+    - name: Run interaction tests
+      working-directory: frontend
+      run: npm run test-storybook -- --maxWorkers=2
+
+  chromatic:
+    # Publishes Storybook to Chromatic and compares every story with its accepted baseline.
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    steps:
+    # Secrets aren't available to pull requests from forks (or before the secret is added), so skip instead of failing.
+    - name: Check for the Chromatic project token
+      id: token
+      env:
+        CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+      run: |
+        if [ -n "$CHROMATIC_PROJECT_TOKEN" ]; then
+          echo "available=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "available=false" >> "$GITHUB_OUTPUT"
+          echo "::notice::CHROMATIC_PROJECT_TOKEN is not set, so the Chromatic visual tests were skipped."
+        fi
+
+    - uses: actions/checkout@v5
+      if: steps.token.outputs.available == 'true'
+      with:
+        # Full history, so TurboSnap can find the baseline commit and only snapshot the stories a change affects.
+        fetch-depth: 0
+    - uses: actions/setup-node@v5
+      if: steps.token.outputs.available == 'true'
+      with:
+        node-version: 22
+        cache: npm
+        cache-dependency-path: frontend/package-lock.json
+    - name: Install dependencies
+      if: steps.token.outputs.available == 'true'
+      working-directory: frontend
+      run: npm ci
+    - name: Publish to Chromatic
+      if: steps.token.outputs.available == 'true'
+      uses: chromaui/action@v1
+      with:
+        projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+        workingDir: frontend
+        buildScriptName: build-storybook
+        # TurboSnap: only snapshot stories whose files (or their dependencies) changed.
+        onlyChanged: true
+        # Visual changes don't fail the job; they wait for review in Chromatic (the PR shows a "UI Tests" check).
+        exitZeroOnChanges: true
+        # main is the source of truth: whatever is merged there becomes the new baseline.
+        autoAcceptChanges: main
