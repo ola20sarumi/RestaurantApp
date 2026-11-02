@@ -2,7 +2,7 @@
 
 A full-stack restaurant ordering system. Customers browse the menu, build a cart and check out for **dine-in, takeout or delivery**, paying online with **Paystack** or at the counter. Staff sign in to run the kitchen queue, manage the menu and see sales reports.
 
-**[▶ Try the live demo](https://ola20sarumi.github.io/RestaurantApp/)**: runs entirely in your browser, nothing to install.
+**[▶ Try the live demo](https://ola20sarumi.github.io/RestaurantApp/)**: runs entirely in your browser, nothing to install. **[📖 Browse the Storybook](https://main--6ae88aa2ee7b92144381fd43.chromatic.com)**: every UI component and page state, published from `main`.
 
 [![Playwright Tests](https://github.com/ola20sarumi/RestaurantApp/actions/workflows/playwright.yml/badge.svg)](https://github.com/ola20sarumi/RestaurantApp/actions/workflows/playwright.yml)
 [![Storybook & Chromatic](https://github.com/ola20sarumi/RestaurantApp/actions/workflows/chromatic.yml/badge.svg)](https://github.com/ola20sarumi/RestaurantApp/actions/workflows/chromatic.yml)
@@ -318,6 +318,8 @@ The UI is split into page components, which load data and call the API, and pres
 Both kinds of browser test are needed. Playwright proves the journeys work end to end, but it's slow, needs the API and a database, and doesn't notice if a badge turns the wrong colour. Stories are fast and fully deterministic, reach states that are hard to set up end to end, and give Chromatic something stable to compare.
 
 Stories never call the network for data. Page stories run the real pages against the demo build's in-browser API (`src/demo`), starting from the demo menu and an order history built for a fixed date (`src/stories/demo-fixtures.ts`). Menu photos are served from `src/demo/images`. The only outside request is the Google Fonts stylesheet, the same one the app uses.
+
+The Storybook for `main` is published by Chromatic at **https://main--6ae88aa2ee7b92144381fd43.chromatic.com**, and updates whenever `main` changes.
 
 ```bash
 cd frontend
