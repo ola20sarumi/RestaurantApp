@@ -1,5 +1,23 @@
 @backend_HostAddress = http://localhost:5044
 
+# Sample requests for the Visual Studio / VS Code REST Client. Run "login" first: the staff requests below send its token.
+# The username and password are the dev logins from appsettings.Development.json (StaffAccounts).
+
+# @name login
+POST {{backend_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "Admin123!"
+}
+
+###
+
+@token = {{login.response.body.$.token}}
+
+### Public: the menu
+
 GET {{backend_HostAddress}}/api/categories
 Accept: application/json
 
@@ -8,26 +26,56 @@ Accept: application/json
 GET {{backend_HostAddress}}/api/products
 Accept: application/json
 
-###
+### Public: place a pay-at-counter takeout order (the server looks up prices and the total)
+
+POST {{backend_HostAddress}}/api/orders
+Content-Type: application/json
+
+{
+  "fulfillmentType": "Takeout",
+  "paymentMethod": "Counter",
+  "customerName": "Ada",
+  "customerPhone": "08012345678",
+  "items": [
+    { "productId": 1, "quantity": 2 }
+  ]
+}
+
+### Staff: orders
 
 GET {{backend_HostAddress}}/api/orders
 Accept: application/json
+Authorization: Bearer {{token}}
 
 ###
 
 GET {{backend_HostAddress}}/api/orders?status=Pending
 Accept: application/json
+Authorization: Bearer {{token}}
 
 ###
 
 GET {{backend_HostAddress}}/api/orders/1
 Accept: application/json
+Authorization: Bearer {{token}}
 
 ###
 
 PUT {{backend_HostAddress}}/api/orders/1/status
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 "Completed"
+
+###
+
+POST {{backend_HostAddress}}/api/orders/1/mark-paid
+Authorization: Bearer {{token}}
+
+### Admin: sales report for a date range in a time zone
+
+GET {{backend_HostAddress}}/api/orders/report?from=2026-01-01&to=2026-01-31&timeZone=Africa/Lagos
+Accept: application/json
+Authorization: Bearer {{token}}
 
 ###

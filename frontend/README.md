@@ -1,59 +1,37 @@
 # Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.3.
+The Angular 19 app for RestaurantApp, with server-side rendering (Angular SSR). It covers the customer pages (menu, cart, checkout, order tracking) and the staff pages (cashier, menu admin, sales reports, login).
 
-## Development server
+See the [main README](../README.md) for the whole project, including the API it talks to (`http://localhost:5044/api`, set in `src/app/api.config.ts`).
 
-To start a local development server, run:
+## Commands
 
-```bash
-ng serve
+Run these from `frontend/`, after `npm install`.
+
+| Command | What it does |
+|---|---|
+| `npm start` | Dev server at http://localhost:4200, reloads on changes. Needs the API running. |
+| `npm run build` | Production build with SSR, written to `dist/frontend` |
+| `npm run serve:ssr:frontend` | Serves that build at http://localhost:4000 (or `$PORT`) |
+| `npm run build:demo` | Self-contained demo with no API needed, written to `dist/demo/restaurant-demo.html` |
+| `npm test -- --watch=false --browsers=ChromeHeadless` | Unit tests (Karma + Jasmine, needs Chrome) |
+| `npm run e2e` | End-to-end tests (Playwright, in `tests/`) |
+
+`npm run e2e` starts the API on a separate test database (`RestaurantDb_E2E`), the dev server and a fake Paystack, so stop your own API first. Run `npx playwright install chromium` once before the first run. The [Testing section of the main README](../README.md#testing) has the details.
+
+## Where things are
+
 ```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+src/
+├── app/
+│   ├── components/     customer/, cashier/, admin/ and auth/ pages
+│   ├── services/       API calls, cart, staff sign-in, HTTP interceptors, route guard
+│   ├── models/         TypeScript types that mirror the API
+│   ├── app.routes.ts   routes (staff pages are guarded by role)
+│   └── app.routes.server.ts   which routes render on the server
+├── demo/               in-browser stand-in for the API, used by the demo build
+├── main.ts / main.server.ts / main.demo.ts   browser, server and demo entry points
+└── styles.css          theme (brand colours, fonts) on top of Bootstrap 5
+tests/                  Playwright e2e tests and the fake Paystack
+scripts/build-demo.mjs  packs the demo build into one HTML file
 ```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
