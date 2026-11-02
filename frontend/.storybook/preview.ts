@@ -8,7 +8,9 @@ const preview: Preview = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
-    controls: { expanded: true }
+    controls: { expanded: true },
+    // Cards fade and slide in; snapshot them where the animation ends (fully visible), not where it starts.
+    chromatic: { pauseAnimationAtEnd: true }
   }
 };
 

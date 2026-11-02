@@ -35,6 +35,14 @@ function save(): void {
   }
 }
 
+/**
+ * Answers from `data` instead of the visitor's saved demo data. Storybook uses this to start every story from the
+ * same database (built for a fixed date), so its screenshots don't change from day to day.
+ */
+export function setDemoDb(data: DemoDb): void {
+  db = data;
+}
+
 /** Clears the visitor's demo data (the banner's "Reset demo" button). */
 export function resetDemo(): void {
   db = null;
