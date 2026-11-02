@@ -9,8 +9,9 @@ const preview: Preview = {
   parameters: {
     layout: 'padded',
     controls: { expanded: true },
-    // Cards fade and slide in; snapshot them where the animation ends (fully visible), not where it starts.
-    chromatic: { pauseAnimationAtEnd: true }
+    // Snapshot with reduced motion: the app's own styles.css then finishes every animation at once (the fade-ins,
+    // and the menu hero's infinite drift, shimmer and ticker), so screenshots don't depend on animation timing.
+    chromatic: { prefersReducedMotion: 'reduce', pauseAnimationAtEnd: true }
   }
 };
 
