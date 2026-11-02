@@ -6,7 +6,7 @@ import { AuthService } from './auth.service';
 
 /**
  * Lets staff with one of `route.data.roles` through; everyone else goes to /login, which returns them here after
- * signing in. These routes render in the browser only (app.routes.server.ts), since the session lives in localStorage.
+ * signing in. These routes render in the browser only (app.routes.server.ts), since the session lives in sessionStorage.
  */
 export const staffGuard: CanActivateFn = (route, state) => {
   const roles = route.data['roles'] as StaffRole[];
