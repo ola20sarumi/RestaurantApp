@@ -17,7 +17,7 @@ export const routes: Routes = [
   // Order confirmation; Paystack sends customers back here after paying.
   { path: 'order/:orderRef', component: OrderStatusComponent },
   { path: 'login', component: LoginComponent },
-  // Staff pages: admins can open both, cashiers only the cashier page.
+  // Staff pages: admins can open all of them, cashiers only the cashier page.
   { path: 'cashier', component: DashboardComponent, canActivate: [staffGuard], data: { roles: ['Admin', 'Cashier'] } },
   { path: 'admin', component: MenuAdminComponent, canActivate: [staffGuard], data: { roles: ['Admin'] } },
   { path: 'admin/reports', component: ReportsComponent, canActivate: [staffGuard], data: { roles: ['Admin'] } },

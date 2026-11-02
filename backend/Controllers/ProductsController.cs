@@ -84,7 +84,7 @@ public class ProductsController : ControllerBase
     }
 
     // Admin: delete a product that has never been ordered. Deleting an ordered one would cascade-delete
-    // its order items and change past order totals, so those should be marked unavailable instead.
+    // its order items, so past orders would lose lines and no longer match their totals; mark it unavailable instead.
     [HttpDelete("{id}")]
     [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> DeleteProduct(int id)
