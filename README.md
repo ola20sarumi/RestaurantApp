@@ -6,8 +6,7 @@ A full-stack restaurant ordering system. Customers browse the menu, build a cart
 
 [![Playwright Tests](https://github.com/ola20sarumi/RestaurantApp/actions/workflows/playwright.yml/badge.svg)](https://github.com/ola20sarumi/RestaurantApp/actions/workflows/playwright.yml)
 [![Storybook & Chromatic](https://github.com/ola20sarumi/RestaurantApp/actions/workflows/chromatic.yml/badge.svg)](https://github.com/ola20sarumi/RestaurantApp/actions/workflows/chromatic.yml)
-<!-- Chromatic: replace <APP_ID> with the appId from your Chromatic project (Manage → Configure). -->
-[![Chromatic](https://img.shields.io/badge/Chromatic-visual%20tests-FC521F?logo=chromatic&logoColor=white)](https://www.chromatic.com/library?appId=<APP_ID>)
+[![Chromatic](https://img.shields.io/badge/Chromatic-visual%20tests-FC521F?logo=chromatic&logoColor=white)](https://www.chromatic.com/library?appId=6ae88aa2ee7b92144381fd43)
 ![.NET 10](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet)
 ![Angular 19](https://img.shields.io/badge/Angular-19-DD0031?logo=angular)
 ![SQL Server](https://img.shields.io/badge/SQL%20Server-EF%20Core-CC2927?logo=microsoftsqlserver)
