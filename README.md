@@ -5,6 +5,8 @@ A full-stack restaurant ordering system. Customers browse the menu, build a cart
 **[▶ Try the live demo](https://ola20sarumi.github.io/RestaurantApp/)**: runs entirely in your browser, nothing to install.
 
 [![Playwright Tests](https://github.com/ola20sarumi/RestaurantApp/actions/workflows/playwright.yml/badge.svg)](https://github.com/ola20sarumi/RestaurantApp/actions/workflows/playwright.yml)
+[![Storybook & Chromatic](https://github.com/ola20sarumi/RestaurantApp/actions/workflows/chromatic.yml/badge.svg)](https://github.com/ola20sarumi/RestaurantApp/actions/workflows/chromatic.yml)
+[![Chromatic](https://img.shields.io/badge/Chromatic-visual%20tests-FC521F?logo=chromatic&logoColor=white)](https://www.chromatic.com/library?appId=6ae88aa2ee7b92144381fd43)
 ![.NET 10](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet)
 ![Angular 19](https://img.shields.io/badge/Angular-19-DD0031?logo=angular)
 ![SQL Server](https://img.shields.io/badge/SQL%20Server-EF%20Core-CC2927?logo=microsoftsqlserver)
@@ -87,6 +89,7 @@ Open `dist/demo/restaurant-demo.html` in any browser, or share the file. A banne
 - **Safe payment confirmation**: an order is marked paid only when Paystack confirms the exact amount and currency, through the redirect check or a signed webhook (HMAC-SHA512). Both paths are idempotent.
 - **Consistent errors**: every error is returned as RFC 7807 problem details JSON.
 - **End-to-end tests** in Playwright run on every push and pull request, against a real SQL Server and a fake Paystack.
+- **Component tests**: Storybook stories with interaction tests for the UI components and pages, and visual regression tests in Chromatic.
 
 ---
 
@@ -99,7 +102,7 @@ Open `dist/demo/restaurant-demo.html` in any browser, or share the file. A banne
 | Data | Entity Framework Core 10 with SQL Server |
 | Auth | JWT bearer tokens (HS256), ASP.NET Core `PasswordHasher` |
 | Payments | Paystack (initialize, verify, webhook) |
-| Testing | Playwright (e2e), Karma + Jasmine (unit) |
+| Testing | Playwright (e2e), Storybook 10 interaction tests, Chromatic (visual regression), Karma + Jasmine (unit) |
 | CI | GitHub Actions with a SQL Server 2022 service container |
 
 ---
@@ -300,9 +303,35 @@ npm test -- --watch=false --browsers=Chrome
 
 This opens a visible Chrome window that runs the tests and then closes.
 
+### Component tests and visual regression
+
+The UI is split into page components, which load data and call the API, and presentational components (`ProductCard`, `CartLine`, `OrderSummary`, `CheckoutForm`, `OrderCard`, `StatusBadge`), which only take inputs and emit outputs. Each layer of tests checks something different:
+
+| Layer | What it checks | Where |
+|---|---|---|
+| Unit tests (Karma + Jasmine) | Each presentational component's rendering and events, in isolation | `*.spec.ts` |
+| Storybook stories | Every state that matters, rendered in a real browser: each order status and payment state, each checkout order type, validation errors, long names, the highest price | `*.stories.ts` |
+| Interaction tests | Play functions click and type like a user and assert what happens: "Add" emits the product, status buttons emit the status, checkout shows the right fields per order type and blocks invalid orders, and the menu, cart and cashier pages work against the demo API | `play` in `*.stories.ts` |
+| Visual regression (Chromatic) | Screenshots every story and compares it with the approved baseline, so an unintended change to layout, colour or spacing shows up for review on the pull request | [Chromatic](https://www.chromatic.com) |
+| End-to-end (Playwright) | Whole user journeys through the real stack: SSR, the API, SQL Server and the fake Paystack | `tests/` |
+
+Both kinds of browser test are needed. Playwright proves the journeys work end to end, but it's slow, needs the API and a database, and doesn't notice if a badge turns the wrong colour. Stories are fast and fully deterministic, reach states that are hard to set up end to end, and give Chromatic something stable to compare.
+
+Stories never call the network for data. Page stories run the real pages against the demo build's in-browser API (`src/demo`), starting from the demo menu and an order history built for a fixed date (`src/stories/demo-fixtures.ts`). Menu photos are served from `src/demo/images`. The only outside request is the Google Fonts stylesheet, the same one the app uses.
+
+```bash
+cd frontend
+npm run storybook          # http://localhost:6006
+npm run build-storybook    # static build in storybook-static/
+npm run test-storybook     # interaction tests, headless (run build-storybook first)
+CHROMATIC_PROJECT_TOKEN=<token> npm run chromatic   # publish to Chromatic from your machine
+```
+
+`npm run test-storybook` serves `storybook-static/` locally and runs every play function in Chromium with `@storybook/test-runner`. It uses the same Playwright browser as the e2e tests (`npx playwright install chromium`).
+
 ### Continuous integration
 
-[`.github/workflows/playwright.yml`](.github/workflows/playwright.yml) runs the full e2e suite on every push and pull request to `main`, against a throwaway SQL Server 2022 container. [`.github/workflows/docker.yml`](.github/workflows/docker.yml) builds and runs the Docker Compose stack, and [`.github/workflows/pages.yml`](.github/workflows/pages.yml) publishes the demo.
+[`.github/workflows/playwright.yml`](.github/workflows/playwright.yml) runs the full e2e suite on every push and pull request to `main`, against a throwaway SQL Server 2022 container. [`.github/workflows/chromatic.yml`](.github/workflows/chromatic.yml) runs on pushes and pull requests that change the frontend: one job runs the Storybook interaction tests, and another publishes Storybook to Chromatic. Chromatic uses TurboSnap, so only stories affected by a change are snapshotted. Visual changes wait for review in Chromatic instead of failing the job, and changes merged to `main` become the new baseline. Without the `CHROMATIC_PROJECT_TOKEN` secret (for example, on pull requests from forks), the Chromatic job is skipped. [`.github/workflows/docker.yml`](.github/workflows/docker.yml) builds and runs the Docker Compose stack, and [`.github/workflows/pages.yml`](.github/workflows/pages.yml) publishes the demo.
 
 ---
 
@@ -321,15 +350,19 @@ RestaurantApp/
 │   ├── Program.cs               Startup: CORS, JWT, EF Core, OpenAPI
 │   └── backend.http             Sample requests
 ├── frontend/                    Angular 19 app with SSR
+│   ├── .storybook/              Storybook configuration
 │   ├── src/app/
 │   │   ├── components/
-│   │   │   ├── customer/        menu, cart, checkout, order-status
-│   │   │   ├── cashier/         dashboard
+│   │   │   ├── customer/        menu, cart, checkout, order-status pages; product-card, cart-line,
+│   │   │   │                    order-summary, checkout-form components
+│   │   │   ├── cashier/         dashboard page; order-card, status-badge components
 │   │   │   ├── admin/           menu-admin, reports
 │   │   │   └── auth/            login
 │   │   ├── services/            API, cart and auth services, interceptor, guard
 │   │   ├── models/              TypeScript models that mirror the API
 │   │   └── api.config.ts        API base URL
+│   ├── src/demo/                In-browser stand-in for the API (demo build and page stories)
+│   ├── src/stories/             Shared story data and demo-API setup
 │   └── tests/                   Playwright e2e tests
 └── .github/workflows/           CI
 ```

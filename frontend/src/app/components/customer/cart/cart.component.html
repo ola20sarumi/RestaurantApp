@@ -20,42 +20,8 @@
       <div class="card border-0 cart-card">
         <ul class="list-group list-group-flush">
           @for (item of cart.items(); track item.product.id) {
-            <li class="list-group-item cart-row">
-              <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-3">
-                <div class="d-flex align-items-center gap-3 flex-grow-1">
-                  @if (item.product.imageUrl) {
-                    <img class="dish-thumb" [src]="item.product.imageUrl" alt="" loading="lazy">
-                  } @else {
-                    <span class="dish-thumb"><i class="bi bi-egg-fried"></i></span>
-                  }
-                  <div>
-                    <div class="dish-name">{{ item.product.name }}</div>
-                    <div class="small text-body-secondary">{{ item.product.price | currency }} each</div>
-                  </div>
-                </div>
-
-                <div class="d-flex align-items-center gap-3">
-                  <div class="input-group input-group-sm qty">
-                    <button type="button" class="btn btn-outline-secondary"
-                            (click)="cart.setQuantity(item.product.id, item.quantity - 1)" aria-label="Decrease quantity">
-                      <i class="bi bi-dash-lg"></i>
-                    </button>
-                    <span class="input-group-text justify-content-center">{{ item.quantity }}</span>
-                    <button type="button" class="btn btn-outline-secondary"
-                            (click)="cart.setQuantity(item.product.id, item.quantity + 1)" aria-label="Increase quantity">
-                      <i class="bi bi-plus-lg"></i>
-                    </button>
-                  </div>
-
-                  <div class="text-end subtotal ms-auto ms-sm-0">{{ item.product.price * item.quantity | currency }}</div>
-
-                  <button type="button" class="btn btn-sm remove-btn" (click)="cart.remove(item.product.id)"
-                          [attr.aria-label]="'Remove ' + item.product.name">
-                    <i class="bi bi-trash3"></i>
-                  </button>
-                </div>
-              </div>
-            </li>
+            <li appCartLine [item]="item"
+                (quantityChange)="cart.setQuantity(item.product.id, $event)" (remove)="cart.remove(item.product.id)"></li>
           }
         </ul>
       </div>

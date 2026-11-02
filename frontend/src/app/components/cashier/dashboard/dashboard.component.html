@@ -31,68 +31,7 @@
   <div class="row row-cols-1 row-cols-md-2 g-3">
     @for (order of orders(); track order.id) {
       <div class="col">
-        <div class="card h-100 border-0 shadow-sm">
-          <div class="card-header bg-white d-flex align-items-center gap-2">
-            <span class="fw-bold">#{{ order.id }}</span>
-            <span class="badge rounded-pill" [class]="badgeClass(order.status)">{{ order.status }}</span>
-            <span class="ms-auto small text-body-secondary">{{ order.orderDate + 'Z' | date: 'short' }}</span>
-          </div>
-          <div class="card-body">
-            <div class="mb-3 pb-3 border-bottom small">
-              <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                <span class="fw-semibold fs-6">{{ order.customerName || (order.fulfillmentType === 'DineIn' ? 'Eat-in guest' : 'Walk-in customer') }}</span>
-                @if (fulfillmentOption(order.fulfillmentType); as option) {
-                  <span class="badge" [class]="option.value === 'Delivery' ? 'text-bg-primary' : 'text-bg-light'">
-                    <i class="bi me-1" [class]="option.icon"></i>{{ option.label }}
-                  </span>
-                }
-              </div>
-              @if (order.customerPhone) {
-                <div><i class="bi bi-telephone me-1 text-body-secondary"></i><a [href]="'tel:' + order.customerPhone">{{ order.customerPhone }}</a></div>
-              }
-              @if (order.deliveryAddress) {
-                <div><i class="bi bi-geo-alt me-1 text-body-secondary"></i>{{ order.deliveryAddress }}</div>
-              }
-            </div>
-            <ul class="list-unstyled mb-3">
-              @for (item of order.items; track item.id) {
-                <li class="d-flex justify-content-between">
-                  <span><span class="text-body-secondary">{{ item.quantity }} ×</span> {{ item.product?.name ?? 'Product #' + item.productId }}</span>
-                  <span>{{ item.unitPrice * item.quantity | currency }}</span>
-                </li>
-              }
-            </ul>
-            <div class="d-flex justify-content-between fw-bold border-top pt-2">
-              <span>Total</span>
-              <span>{{ order.totalAmount | currency }}</span>
-            </div>
-            <div class="d-flex flex-wrap align-items-center gap-2 mt-2 small">
-              @if (order.paymentStatus === 'Paid') {
-                <span class="badge text-bg-success payment-badge">
-                  <i class="bi bi-check-lg me-1"></i>{{ order.paymentMethod === 'Online' ? 'Paid online' : 'Paid at counter' }}
-                </span>
-              } @else {
-                <span class="badge text-bg-warning payment-badge"><i class="bi bi-cash-coin me-1"></i>Unpaid · pay at counter</span>
-                <button type="button" class="btn btn-sm btn-outline-success ms-auto" (click)="markPaid(order)">
-                  <i class="bi bi-check2-circle me-1"></i>Mark as paid
-                </button>
-              }
-            </div>
-          </div>
-          <div class="card-footer bg-white">
-            <div class="d-flex flex-wrap gap-1">
-              @for (status of statuses; track status) {
-                <button type="button" class="btn btn-sm"
-                        [class.btn-primary]="status === order.status"
-                        [class.btn-outline-secondary]="status !== order.status"
-                        [disabled]="status === order.status"
-                        (click)="setStatus(order, status)">
-                  {{ status }}
-                </button>
-              }
-            </div>
-          </div>
-        </div>
+        <app-order-card [order]="order" (statusChange)="setStatus(order, $event)" (markPaid)="markPaid(order)" />
       </div>
     } @empty {
       <div class="col-12 text-center text-body-secondary py-5">

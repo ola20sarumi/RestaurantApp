@@ -1,0 +1,5 @@
+/* Fills its grid column, so cards in a row have equal heights. */
+:host {
+  display: block;
+  height: 100%;
+}
