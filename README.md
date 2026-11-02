@@ -49,7 +49,7 @@ A full-stack restaurant ordering system. Customers browse the menu, build a cart
 
 **Live demo: https://ola20sarumi.github.io/RestaurantApp/**
 
-It's published to GitHub Pages on every push to `main` ([`.github/workflows/pages.yml`](.github/workflows/pages.yml)). The frontend can be built as a **single, self-contained HTML file** that runs the whole app in the browser, with no API, database or Paystack account needed. The API is replaced by an in-browser stand-in (`frontend/src/demo/`) with a sample menu and two weeks of order history, and everything is saved only in the visitor's browser.
+It's published to GitHub Pages on every push to `main` that changes the frontend ([`.github/workflows/pages.yml`](.github/workflows/pages.yml)). The frontend can be built as a **single, self-contained HTML file** that runs the whole app in the browser, with no API, database or Paystack account needed. The API is replaced by an in-browser stand-in (`frontend/src/demo/`) with a sample menu and two weeks of order history, and everything is saved only in the visitor's browser.
 
 ```bash
 cd frontend
@@ -271,7 +271,7 @@ npm run e2e -- tests/checkout.spec.ts
 npx playwright show-report
 ```
 
-Playwright starts the API, the Angular dev server and a **fake Paystack** (`tests/fake-paystack.mjs`) automatically.
+Playwright always starts its own API, and starts the Angular dev server and a **fake Paystack** (`tests/fake-paystack.mjs`) unless they're already running.
 
 The tests never touch your development database. Playwright runs the API against a **separate test database**, `RestaurantDb_E2E` on your local SQL Server, which it creates, migrates and seeds before the run (CI does the same on a throwaway SQL Server container). To put it on another server, set `E2E_CONNECTION_STRING`:
 
