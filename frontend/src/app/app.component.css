@@ -2,13 +2,32 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  /* Dynamic viewport height: doesn't jump when a mobile browser's address bar shows or hides. */
+  min-height: 100dvh;
 }
 
 .app-navbar {
   background: rgba(27, 11, 46, 0.92);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  padding-block: 0.65rem;
+  padding-block: 0.4rem;
+}
+
+@media (min-width: 576px) {
+  .app-navbar {
+    padding-block: 0.65rem;
+  }
+}
+
+/* Phones: icon-only links packed tightly; a signed-in admin's six links fit on a 320px screen. */
+.navbar-nav {
+  gap: 2px;
+}
+
+@media (min-width: 576px) {
+  .navbar-nav {
+    gap: 0.25rem;
+  }
 }
 
 /* A thin moving rainbow of the brand colours under the bar. */
@@ -23,22 +42,35 @@
 }
 
 .navbar-brand {
+  margin-right: 0.5rem;
   color: #fff;
-  font-size: 1.5rem;
+  font-size: clamp(1.25rem, 1rem + 1.2vw, 1.5rem);
 }
 
 .brand-mark {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 2.3rem;
-  height: 2.3rem;
+  width: 2rem;
+  height: 2rem;
   border-radius: 0.8rem;
   background: var(--gradient-sun);
   color: #fff;
   font-size: 1.15rem;
   box-shadow: 0 0 1.2rem rgba(255, 197, 49, 0.55);
   animation: flicker 2.4s ease-in-out infinite;
+}
+
+@media (min-width: 576px) {
+  .navbar-brand {
+    margin-right: 1rem;
+  }
+
+  .brand-mark {
+    width: 2.3rem;
+    height: 2.3rem;
+  }
 }
 
 .brand-name {
@@ -48,17 +80,48 @@
   color: transparent;
 }
 
+/* Every navbar item is at least 40px square on the smallest phones and 44px from 360px up. */
+.app-navbar .nav-link,
+.app-navbar .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding-inline: 0.5rem !important;
+}
+
+@media (min-width: 360px) {
+  .app-navbar .nav-link,
+  .app-navbar .btn {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+}
+
+@media (min-width: 576px) {
+  .app-navbar .nav-link {
+    padding-inline: 0.9rem !important;
+  }
+
+  .app-navbar .btn {
+    min-height: 2.25rem;
+    padding-inline: 0.75rem !important;
+  }
+}
+
 .app-navbar .nav-link {
   color: rgba(255, 255, 255, 0.75);
   font-weight: 600;
   border-radius: 999px;
-  padding-inline: 0.9rem !important;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.app-navbar .nav-link:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+@media (hover: hover) {
+  .app-navbar .nav-link:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+  }
 }
 
 .nav-link.active {
@@ -72,6 +135,21 @@
   color: #fff;
   box-shadow: 0 0 0.8rem rgba(255, 46, 126, 0.7);
   animation: pop 0.45s cubic-bezier(0.3, 1.8, 0.5, 1);
+}
+
+/* Phones: the cart count sits on the icon's corner, so the icon-only link stays square. */
+.cart-link .badge {
+  position: absolute;
+  top: 0;
+  right: -0.15rem;
+  font-size: 0.65rem;
+}
+
+@media (min-width: 576px) {
+  .cart-link .badge {
+    position: static;
+    font-size: 0.75em; /* Bootstrap's badge size */
+  }
 }
 
 .nav-link.active .badge.bg-primary {
@@ -97,10 +175,11 @@
   --bs-btn-hover-color: var(--accent);
 }
 
+/* Same width as the navbar's container at every breakpoint, so the logo lines up with the page. */
 main {
-  max-width: 1140px;
   flex: 1;
   width: 100%;
+  padding-block: var(--space-page);
 }
 
 .app-footer {
