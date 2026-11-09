@@ -84,14 +84,30 @@ test.describe('phone (360px)', () => {
     await visitEveryPage(page, request, () => expectNoHorizontalScroll(page));
   });
 
-  test('the navbar stays on one line for a signed-in admin', async ({ page, request }) => {
+  test('a signed-in admin reaches the staff links through the menu button', async ({ page, request }) => {
     await loginAs(page, request, 'admin');
     await gotoApp(page, '/admin');
     const nav = page.locator('nav.app-navbar');
-    await expect(nav.getByRole('link', { name: 'Reports' })).toBeVisible();
-    await expect(nav.getByRole('button', { name: 'Sign out' })).toBeVisible();
-    // One row of links: the bar is no taller than a single 44px tap target plus its padding.
+    const toggler = nav.getByRole('button', { name: 'Staff menu' });
+    const reports = nav.getByRole('link', { name: 'Reports' });
+
+    // Folded away: one row (a 44px tap target plus padding) with the menu, cart and menu button.
+    await expect(reports).toBeHidden();
     expect((await nav.boundingBox())!.height).toBeLessThan(70);
+
+    await toggler.click();
+    await expect(toggler).toHaveAttribute('aria-expanded', 'true');
+    await expect(nav.getByRole('button', { name: 'Sign out' })).toBeVisible();
+    await reports.click();
+
+    await expect(page).toHaveURL(/\/admin\/reports$/);
+    await expect(toggler).toHaveAttribute('aria-expanded', 'false');
+    await expect(reports).toBeHidden();
+  });
+
+  test('customers get no staff menu button', async ({ page }) => {
+    await gotoApp(page, '/menu');
+    await expect(page.getByRole('button', { name: 'Staff menu' })).toHaveCount(0);
   });
 
   test('every category chip is fully on screen', async ({ page }) => {

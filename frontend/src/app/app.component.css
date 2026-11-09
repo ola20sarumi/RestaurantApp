@@ -19,7 +19,7 @@
   }
 }
 
-/* Phones: icon-only links packed tightly; a signed-in admin's six links fit on a 320px screen. */
+/* Phones: icon-only Menu/Cart links packed tightly beside the wordmark and the staff menu button. */
 .navbar-nav {
   gap: 2px;
 }
@@ -173,6 +173,57 @@
 .app-navbar .btn-link {
   --bs-btn-color: rgba(255, 255, 255, 0.75);
   --bs-btn-hover-color: var(--accent);
+}
+
+/* Staff menu button: the same 44px pill as the links beside it. No `display` here: from 992px up Bootstrap hides it. */
+.staff-toggler {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  color: #fff;
+  font-size: 1.35rem;
+}
+
+.staff-toggler[aria-expanded="true"] {
+  color: var(--night);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Below 992px the staff links unfold under the bar as full-width, labelled rows. */
+@media (max-width: 991.98px) {
+  .staff-nav {
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .staff-nav .btn {
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 2.75rem;
+    padding-inline: 0.9rem !important;
+    border-color: transparent;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    text-decoration: none;
+  }
+
+  .signed-in-as {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+  }
+}
+
+@media (min-width: 992px) {
+  .staff-nav {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.25rem;
+  }
 }
 
 /* Same width as the navbar's container at every breakpoint, so the logo lines up with the page. */
