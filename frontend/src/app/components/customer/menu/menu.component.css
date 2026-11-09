@@ -8,9 +8,8 @@
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  border-radius: 1.75rem;
-  padding: clamp(2rem, 5vw, 3.75rem);
-  min-height: 320px;
+  border-radius: clamp(1.25rem, 1rem + 1.5vw, 1.75rem);
+  padding: clamp(1.25rem, 0.5rem + 4.5vw, 3.75rem);
   background: var(--night);
   color: #fff;
   box-shadow: 0 1.5rem 3rem rgba(27, 11, 46, 0.25);
@@ -20,14 +19,29 @@
   position: absolute;
   z-index: -1;
   border-radius: 50%;
-  filter: blur(50px);
+  filter: blur(36px);
   opacity: 0.85;
   animation: drift 12s ease-in-out infinite alternate;
 }
 
-.blob-1 { width: 380px; height: 380px; background: var(--brand); top: -120px; right: 8%; }
-.blob-2 { width: 300px; height: 300px; background: var(--pink); bottom: -150px; right: 30%; animation-delay: -4s; }
-.blob-3 { width: 260px; height: 260px; background: var(--accent); top: 10%; right: -80px; opacity: 0.6; animation-delay: -8s; }
+/* Phones: smaller blobs tucked into the right-hand corner, so the copy stays readable. */
+.blob-1 { width: 200px; height: 200px; background: var(--brand); top: -90px; right: -40px; }
+.blob-2 { width: 160px; height: 160px; background: var(--pink); bottom: -100px; right: 20%; animation-delay: -4s; }
+.blob-3 { width: 140px; height: 140px; background: var(--accent); top: 30%; right: -80px; opacity: 0.6; animation-delay: -8s; }
+
+@media (min-width: 768px) {
+  .hero {
+    min-height: 320px;
+  }
+
+  .blob {
+    filter: blur(50px);
+  }
+
+  .blob-1 { width: 380px; height: 380px; top: -120px; right: 8%; }
+  .blob-2 { width: 300px; height: 300px; bottom: -150px; right: 30%; }
+  .blob-3 { width: 260px; height: 260px; top: 10%; right: -80px; }
+}
 
 .hero-content {
   position: relative;
@@ -36,20 +50,21 @@
 
 .hero-kicker {
   display: inline-block;
-  margin-bottom: 1rem;
-  padding: 0.35rem 0.9rem;
+  margin-bottom: clamp(0.6rem, 0.4rem + 1vw, 1rem);
+  padding: 0.3rem 0.8rem;
   border-radius: 999px;
   background: rgba(255, 197, 49, 0.15);
   border: 1px solid rgba(255, 197, 49, 0.5);
   color: var(--accent);
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: clamp(0.72rem, 0.68rem + 0.25vw, 0.85rem);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
 .hero-title {
-  font-size: clamp(2.8rem, 8vw, 5rem);
+  margin-bottom: clamp(0.5rem, 0.3rem + 1vw, 1rem);
+  font-size: clamp(2.4rem, 1.3rem + 5.5vw, 5rem);
   line-height: 0.95;
 }
 
@@ -63,21 +78,39 @@
 }
 
 .hero-lead {
-  font-size: 1.15rem;
+  max-width: 30rem;
+  margin-bottom: clamp(1rem, 0.6rem + 1.5vw, 1.5rem);
+  font-size: clamp(1rem, 0.95rem + 0.3vw, 1.15rem);
   color: rgba(255, 255, 255, 0.82);
+}
+
+.hero-perks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
 .hero-perk {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.45rem 0.9rem;
+  padding: 0.35rem 0.75rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(6px);
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 0.75rem + 0.25vw, 0.9rem);
   font-weight: 600;
+}
+
+@media (min-width: 576px) {
+  .hero-perks {
+    gap: 0.5rem;
+  }
+
+  .hero-perk {
+    padding: 0.45rem 0.9rem;
+  }
 }
 
 .hero-perk i {
@@ -90,29 +123,35 @@
   pointer-events: none;
 }
 
+/* Phones: two small, faded emojis in the top-right corner, clear of the title; all five from 768px. */
 .food {
   position: absolute;
-  font-size: 3.5rem;
+  font-size: 1.75rem;
+  opacity: 0.5;
   filter: drop-shadow(0 0.6rem 1rem rgba(0, 0, 0, 0.35));
   animation: float 5s ease-in-out infinite;
 }
 
-.food-1 { top: 14%; right: 26%; animation-delay: -1s; }
-.food-2 { top: 46%; right: 9%; font-size: 4.75rem; }
-.food-3 { bottom: 12%; right: 32%; font-size: 2.75rem; animation-delay: -2.5s; }
-.food-4 { top: 8%; right: 6%; font-size: 2.75rem; animation-delay: -3.5s; }
-.food-5 { bottom: 8%; right: 18%; font-size: 2.5rem; animation-delay: -2s; opacity: 0.9; }
+.food-1, .food-3, .food-5 { display: none; }
+.food-2 { top: 9%; right: 16%; font-size: 2.25rem; }
+.food-4 { top: 32%; right: 5%; animation-delay: -3.5s; }
 
-@media (max-width: 767.98px) {
-  .food { font-size: 2rem; opacity: 0.35; }
-  .food-2 { font-size: 2.75rem; }
-  .food-5 { display: none; }
+@media (min-width: 768px) {
+  .food { font-size: 3.5rem; opacity: 1; }
+  .food-1, .food-3, .food-5 { display: block; }
+
+  .food-1 { top: 14%; right: 26%; animation-delay: -1s; }
+  .food-2 { top: 46%; right: 9%; font-size: 4.75rem; }
+  .food-3 { bottom: 12%; right: 32%; font-size: 2.75rem; animation-delay: -2.5s; }
+  .food-4 { top: 8%; right: 6%; font-size: 2.75rem; }
+  .food-5 { bottom: 8%; right: 18%; font-size: 2.5rem; animation-delay: -2s; opacity: 0.9; }
 }
 
 /* ---------- Ticker ---------- */
 
 .ticker {
   overflow: hidden;
+  font-size: clamp(0.85rem, 0.8rem + 0.25vw, 1rem);
   border-radius: 999px;
   background: var(--gradient-sun);
   color: var(--night);
@@ -133,8 +172,43 @@
 
 /* ---------- Category filter ---------- */
 
+/* Phones: one swipeable row of chips running edge to edge (the negative margin cancels the container's padding),
+   with room above and below so the selected chip's glow isn't clipped. */
+.category-filter {
+  display: flex;
+  gap: 0.5rem;
+  margin: -0.5rem calc(var(--bs-gutter-x) * -0.5) 0.5rem;
+  padding: 0.5rem calc(var(--bs-gutter-x) * 0.5) 1.1rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: calc(var(--bs-gutter-x) * 0.5);
+  scrollbar-width: none;
+}
+
+.category-filter::-webkit-scrollbar {
+  display: none;
+}
+
 .category-filter .btn {
+  flex: none;
+  min-height: 2.75rem;
   padding-inline: 1.15rem;
+  white-space: nowrap;
+  scroll-snap-align: start;
+}
+
+@media (min-width: 576px) {
+  .category-filter {
+    flex-wrap: wrap;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .category-filter .btn {
+    min-height: 0;
+  }
 }
 
 /* ---------- Animations ---------- */

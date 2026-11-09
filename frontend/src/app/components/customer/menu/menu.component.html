@@ -5,9 +5,9 @@
 
   <div class="hero-content">
     <span class="hero-kicker"><i class="bi bi-fire me-1"></i>Hot &amp; fresh today</span>
-    <h1 class="hero-title mb-3">Our <span class="hero-highlight">Menu</span></h1>
-    <p class="hero-lead mb-4">Freshly prepared dishes — pick your favourites and we'll get cooking.</p>
-    <div class="d-flex flex-wrap gap-2">
+    <h1 class="hero-title">Our <span class="hero-highlight">Menu</span></h1>
+    <p class="hero-lead">Freshly prepared dishes — pick your favourites and we'll get cooking.</p>
+    <div class="hero-perks">
       <span class="hero-perk"><i class="bi bi-lightning-charge-fill"></i>Ready fast</span>
       <span class="hero-perk"><i class="bi bi-scooter"></i>Delivery</span>
       <span class="hero-perk"><i class="bi bi-credit-card-2-front-fill"></i>Pay online or at the counter</span>
@@ -49,7 +49,7 @@
   </div>
 } @else {
   <!-- Category filter -->
-  <div class="d-flex flex-wrap gap-2 mb-4 category-filter" role="group" aria-label="Filter by category">
+  <div class="category-filter" role="group" aria-label="Filter by category">
     <button type="button" class="btn rounded-pill"
             [class.btn-primary]="selectedCategoryId() === null"
             [class.btn-outline-primary]="selectedCategoryId() !== null"
@@ -67,7 +67,7 @@
   </div>
 
   <!-- Product grid -->
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-3 g-md-4">
     @for (product of filteredProducts(); track product.id; let i = $index) {
       <div class="col">
         <app-product-card [product]="product" [quantityInCart]="quantityInCart(product.id)" [animationDelay]="i * 60"
