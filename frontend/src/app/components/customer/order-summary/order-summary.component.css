@@ -1,0 +1,36 @@
+/* The receipt adapts to the column it sits in (beside the form, or full width under it), not to the screen. */
+:host {
+  container-type: inline-size;
+}
+
+.summary-card {
+  padding: clamp(1.1rem, 7cqi, 1.5rem);
+}
+
+.summary-line {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.line-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.line-price {
+  white-space: nowrap;
+}
+
+/* Very narrow receipts drop the thumbnails, so the dish name keeps a sensible width. */
+@container (max-width: 17rem) {
+  .summary-line .dish-thumb {
+    display: none;
+  }
+}
+
+@container (min-width: 24rem) {
+  .summary-line {
+    gap: 1rem;
+  }
+}

@@ -15,15 +15,15 @@
     <a routerLink="/menu" class="btn btn-primary btn-lg px-4">Browse the menu</a>
   </div>
 } @else {
-  <div class="row g-4">
+  <div class="row g-4 g-xl-5">
     <!-- Form section -->
-    <div class="col-md-7">
+    <div class="col-lg-7">
       <app-checkout-form [total]="cart.total()" [submitting]="isSubmitting()" [error]="error()"
                          (fulfillmentTypeChange)="error.set(null)" (placeOrder)="placeOrder($event)" />
     </div>
 
     <!-- Order summary sidebar -->
-    <div class="col-md-5">
+    <div class="col-lg-5">
       <app-order-summary class="summary-sticky" [items]="cart.items()" [total]="cart.total()">
         <div class="receipt-note"><i class="bi bi-shield-check"></i>Secure payment with Paystack, or pay at the counter.</div>
         <a routerLink="/cart" class="btn btn-link px-0 mt-2 align-self-start"><i class="bi bi-arrow-left me-1"></i>Edit cart</a>

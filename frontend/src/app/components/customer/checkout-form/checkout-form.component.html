@@ -8,7 +8,7 @@
           <div class="col">
             <input type="radio" class="btn-check" name="fulfillmentType" [id]="'type-' + option.value"
                    [value]="option.value" [ngModel]="fulfillmentType" (ngModelChange)="selectOrderType($event)">
-            <label class="btn btn-outline-primary w-100 h-100 py-3 order-type" [for]="'type-' + option.value">
+            <label class="btn btn-outline-primary w-100 h-100 py-2 py-sm-3 order-type type-tile" [for]="'type-' + option.value">
               <span class="type-icon"><i [class]="'bi ' + option.icon"></i></span>
               <span class="fw-semibold d-block">{{ option.label }}</span>
               <small class="hint d-block">{{ option.hint }}</small>
