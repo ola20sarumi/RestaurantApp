@@ -1,5 +1,7 @@
-import { Component, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 
 import { AuthService } from './services/auth.service';
 import { CartService } from './services/cart.service';
@@ -17,7 +19,26 @@ export class AppComponent {
   readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
+  /** Whether the staff links are unfolded below 992px (from 992px up they're always on the bar). */
+  readonly staffMenuOpen = signal(false);
+
+  constructor() {
+    // Fold the menu away once a link in it (or anywhere else) has taken the user to another page.
+    this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd), takeUntilDestroyed())
+      .subscribe(() => this.staffMenuOpen.set(false));
+  }
+
+  toggleStaffMenu(): void {
+    this.staffMenuOpen.update(open => !open);
+  }
+
+  closeStaffMenu(): void {
+    this.staffMenuOpen.set(false);
+  }
+
   logout(): void {
+    this.closeStaffMenu();
     this.auth.logout();
     this.router.navigate(['/login']);
   }

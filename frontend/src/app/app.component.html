@@ -1,12 +1,12 @@
-<nav class="navbar navbar-expand app-navbar sticky-top" data-bs-theme="dark">
+<nav class="navbar navbar-expand-lg app-navbar sticky-top" data-bs-theme="dark" (keydown.escape)="closeStaffMenu()">
   <div class="container">
     <a class="navbar-brand fw-bold d-flex align-items-center gap-2" routerLink="/menu" aria-label="Restaurant">
       <span class="brand-mark"><i class="bi bi-fire"></i></span>
-      <!-- Signed-in staff get up to six links, so below 992px the wordmark makes room for them. -->
-      <span class="brand-name" [class.d-none]="auth.session()" [class.d-lg-inline]="auth.session()">Restaurant</span>
+      <span class="brand-name">Restaurant</span>
     </a>
 
-    <ul class="navbar-nav ms-auto align-items-center">
+    <!-- Menu and Cart stay on the bar at every width; on phones they're icon-only. -->
+    <ul class="navbar-nav flex-row ms-auto align-items-center">
       <li class="nav-item">
         <a class="nav-link" routerLink="/menu" routerLinkActive="active" aria-label="Menu">
           <i class="bi bi-book me-sm-1"></i><span class="d-none d-sm-inline">Menu</span>
@@ -24,34 +24,45 @@
           }
         </a>
       </li>
-      @if (auth.session(); as session) {
-        @if (session.role === 'Admin') {
-          <li class="nav-item ms-sm-2">
-            <a class="btn btn-sm btn-outline-secondary" routerLink="/admin" routerLinkActive="active"
-               [routerLinkActiveOptions]="{ exact: true }" aria-label="Admin">
-              <i class="bi bi-pencil-square me-lg-1"></i><span class="d-none d-lg-inline">Admin</span>
+    </ul>
+
+    @if (auth.session(); as session) {
+      <!-- Below 992px the staff links fold into this menu; Bootstrap's collapse CSS shows it, no Bootstrap JS. -->
+      <button type="button" class="navbar-toggler staff-toggler ms-1" (click)="toggleStaffMenu()"
+              aria-controls="staff-nav" [attr.aria-expanded]="staffMenuOpen()" aria-label="Staff menu">
+        <i class="bi" [class.bi-list]="!staffMenuOpen()" [class.bi-x-lg]="staffMenuOpen()"></i>
+      </button>
+
+      <div id="staff-nav" class="collapse navbar-collapse flex-grow-0" [class.show]="staffMenuOpen()">
+        <!-- Any click in here (even on the current page's link, which doesn't navigate) folds the menu away. -->
+        <ul class="navbar-nav staff-nav ms-lg-2" (click)="closeStaffMenu()">
+          @if (session.role === 'Admin') {
+            <li class="nav-item">
+              <a class="btn btn-sm btn-outline-secondary" routerLink="/admin" routerLinkActive="active"
+                 [routerLinkActiveOptions]="{ exact: true }">
+                <i class="bi bi-pencil-square me-2 me-lg-1"></i>Admin
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="btn btn-sm btn-outline-secondary" routerLink="/admin/reports" routerLinkActive="active">
+                <i class="bi bi-graph-up me-2 me-lg-1"></i>Reports
+              </a>
+            </li>
+          }
+          <li class="nav-item">
+            <a class="btn btn-sm btn-outline-secondary" routerLink="/cashier" routerLinkActive="active">
+              <i class="bi bi-person-badge me-2 me-lg-1"></i>Cashier
             </a>
           </li>
           <li class="nav-item">
-            <a class="btn btn-sm btn-outline-secondary" routerLink="/admin/reports" routerLinkActive="active"
-               aria-label="Reports">
-              <i class="bi bi-graph-up me-lg-1"></i><span class="d-none d-lg-inline">Reports</span>
-            </a>
+            <button type="button" class="btn btn-sm btn-link" (click)="logout()" [title]="'Signed in as ' + session.username">
+              <i class="bi bi-box-arrow-right me-2 me-lg-1"></i>Sign out
+              <span class="signed-in-as d-lg-none ms-auto">{{ session.username }}</span>
+            </button>
           </li>
-        }
-        <li class="nav-item" [class.ms-sm-2]="session.role !== 'Admin'">
-          <a class="btn btn-sm btn-outline-secondary" routerLink="/cashier" routerLinkActive="active" aria-label="Cashier">
-            <i class="bi bi-person-badge me-lg-1"></i><span class="d-none d-lg-inline">Cashier</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <button type="button" class="btn btn-sm btn-link" (click)="logout()" [title]="'Signed in as ' + session.username"
-                  aria-label="Sign out">
-            <i class="bi bi-box-arrow-right me-lg-1"></i><span class="d-none d-lg-inline">Sign out</span>
-          </button>
-        </li>
-      }
-    </ul>
+        </ul>
+      </div>
+    }
   </div>
 </nav>
 
