@@ -104,10 +104,6 @@
 }
 
 @media (min-width: 576px) {
-  .hero-perks {
-    gap: 0.5rem;
-  }
-
   .hero-perk {
     padding: 0.45rem 0.9rem;
   }
@@ -151,7 +147,6 @@
 
 .ticker {
   overflow: hidden;
-  font-size: clamp(0.85rem, 0.8rem + 0.25vw, 1rem);
   border-radius: 999px;
   background: var(--gradient-sun);
   color: var(--night);
@@ -192,7 +187,6 @@
 
 .category-filter .btn {
   flex: none;
-  min-height: 2.75rem;
   padding-inline: 1.15rem;
   white-space: nowrap;
   scroll-snap-align: start;
@@ -204,10 +198,6 @@
     margin: 0 0 1.5rem;
     padding: 0;
     overflow: visible;
-  }
-
-  .category-filter .btn {
-    min-height: 0;
   }
 }
 
