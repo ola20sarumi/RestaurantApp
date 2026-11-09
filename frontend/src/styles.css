@@ -172,6 +172,26 @@ h4, .h4 { font-size: clamp(1.2rem, 1.1rem + 0.5vw, 1.5rem); }
   }
 }
 
+/* Touch screens: buttons and fields at least 44px tall (padding rather than min-height, so labels stay centred). */
+@media (pointer: coarse) {
+  .btn {
+    --bs-btn-padding-y: 0.6rem;
+  }
+
+  .btn-sm {
+    --bs-btn-padding-y: 0.7rem;
+  }
+
+  .btn-lg {
+    --bs-btn-padding-y: 0.6rem;
+  }
+
+  .form-control,
+  .form-select {
+    min-height: 2.75rem;
+  }
+}
+
 .form-control:focus,
 .form-select:focus,
 .form-check-input:focus {

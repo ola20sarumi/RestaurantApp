@@ -12,16 +12,21 @@
   }
 }
 
-/* Narrow: dish on top, stepper / subtotal / remove underneath. From 32rem of row width: all on one line. */
+/* Narrow rows: a 2x2 grid, dish | remove on top and stepper | subtotal underneath, so nothing has to shrink below
+   a 44px tap target on a 320px phone. From 32rem of row width: everything on one line. */
 .line {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "dish remove"
+    "qty subtotal";
+  align-items: center;
   gap: 0.75rem;
 }
 
 .line-dish {
+  grid-area: dish;
   display: flex;
-  flex: 1 1 auto;
   align-items: center;
   gap: 0.75rem;
   min-width: 0;
@@ -31,33 +36,46 @@
   min-width: 0;
 }
 
+/* The stepper, subtotal and remove button join the grid directly on narrow rows. */
 .line-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  display: contents;
 }
 
-.line-actions .subtotal {
-  margin-left: auto;
+.qty {
+  grid-area: qty;
+  justify-self: start;
+}
+
+.subtotal {
+  grid-area: subtotal;
+}
+
+.remove-btn {
+  grid-area: remove;
+  flex-shrink: 0;
 }
 
 @container (min-width: 32rem) {
   .line {
-    flex-direction: row;
+    display: flex;
     align-items: center;
     gap: 1rem;
   }
 
   .line-dish {
+    flex: 1 1 auto;
     gap: 1rem;
   }
 
   .line-actions {
+    display: flex;
+    align-items: center;
     gap: 1rem;
   }
 
-  .line-actions .subtotal {
-    margin-left: 0;
+  /* Same width in every row, so the subtotals line up. */
+  .subtotal {
+    min-width: 5.5rem;
   }
 }
 
@@ -86,6 +104,7 @@
   --bs-btn-hover-border-color: transparent;
   --bs-btn-active-bg: var(--brand-dark);
   --bs-btn-active-color: #fff;
+  flex-shrink: 0;
   width: 2rem;
   height: 2rem;
   padding: 0;
@@ -104,7 +123,7 @@
 }
 
 .subtotal {
-  min-width: 5.5rem;
+  min-width: 0;
   white-space: nowrap;
   font-family: var(--display-font);
   font-weight: 800;

@@ -41,10 +41,13 @@
   overflow-wrap: anywhere;
 }
 
-/* Touch screens: 44px edit/delete buttons (still in one row, so the table stays inside a phone screen). */
+/* Touch screens: 44px-wide edit/delete buttons (the shared styles make them 44px tall) and tabs. */
 @media (pointer: coarse) {
   .row-actions .btn {
     min-width: 2.75rem;
+  }
+
+  .nav-pills .nav-link {
     min-height: 2.75rem;
   }
 }

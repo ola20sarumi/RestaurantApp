@@ -36,10 +36,3 @@
     margin-left: 0 !important;
   }
 }
-
-/* Touch screens: 44px tall status and "Mark as paid" buttons. */
-@media (pointer: coarse) {
-  .touch-target {
-    min-height: 2.75rem;
-  }
-}

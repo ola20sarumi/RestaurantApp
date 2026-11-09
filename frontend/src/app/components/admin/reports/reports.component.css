@@ -17,6 +17,17 @@
   overflow-y: auto;
 }
 
+/* Phones: slightly smaller tables with tighter cells, so date, count and amount fit a 320px screen. */
+@media (max-width: 575.98px) {
+  .card-body {
+    padding: 0.85rem;
+  }
+
+  .table {
+    font-size: 0.875rem;
+  }
+}
+
 tfoot td {
   border-bottom: 0;
 }

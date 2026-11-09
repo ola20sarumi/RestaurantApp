@@ -9,10 +9,3 @@ select {
     width: 100%;
   }
 }
-
-@media (pointer: coarse) {
-  .controls .form-select,
-  .controls .btn {
-    min-height: 2.75rem;
-  }
-}
