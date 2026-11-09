@@ -104,6 +104,25 @@ test.describe('phone (360px)', () => {
   });
 });
 
+test.describe('phone checkout', () => {
+  test.use({ viewport: { width: 360, height: 640 }, isMobile: true, hasTouch: true });
+
+  test('submitting without an order type brings the reason into view', async ({ page }) => {
+    await addFirstProductToCart(page);
+    await gotoApp(page, '/checkout');
+    const submit = page.getByRole('button', { name: 'Confirm & Place Order' });
+    // Scroll so the order-type tiles are off-screen above, as after scrolling down to the button.
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect(page.locator('label[for="type-DineIn"]')).not.toBeInViewport();
+
+    await submit.tap();
+    const alert = page.getByRole('alert');
+    await expect(alert).toContainText("Please choose how you'd like your order.");
+    await expect(alert).toBeInViewport();
+    await expect(page.locator('label[for="type-DineIn"]')).toBeInViewport();
+  });
+});
+
 test.describe('desktop (1440px)', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
