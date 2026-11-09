@@ -64,7 +64,9 @@ describe('OrderCardComponent', () => {
   it('shows the order number, status, customer, contact details, items and total', () => {
     render(delivery);
 
-    expect(element.querySelector('.card-header .fw-bold')?.textContent).toBe('#42');
+    expect(element.querySelector('.card-header .ticket-number')?.textContent).toBe('#42');
+    // The card's colours are keyed on this attribute.
+    expect(element.getAttribute('data-status')).toBe('Preparing');
     expect(element.querySelector('.card-header .badge.rounded-pill')?.textContent?.trim()).toBe('Preparing');
     expect(element.textContent).toContain('Ngozi Obi');
     expect(element.textContent).toContain('Delivery');

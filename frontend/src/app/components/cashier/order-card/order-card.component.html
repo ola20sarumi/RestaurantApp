@@ -1,7 +1,7 @@
 @let o = order();
-<div class="card h-100 border-0 shadow-sm">
-  <div class="card-header bg-white d-flex flex-wrap align-items-center gap-2">
-    <span class="fw-bold">#{{ o.id }}</span>
+<div class="card h-100 border-0">
+  <div class="card-header d-flex flex-wrap align-items-center gap-2">
+    <span class="ticket-number">#{{ o.id }}</span>
     <app-status-badge [status]="o.status" />
     <span class="ms-auto small text-body-secondary order-time">{{ o.orderDate + 'Z' | date: 'short' }}</span>
   </div>

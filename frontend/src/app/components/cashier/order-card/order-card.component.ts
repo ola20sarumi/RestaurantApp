@@ -13,7 +13,9 @@ import { StatusBadgeComponent } from '../status-badge/status-badge.component';
   imports: [CurrencyPipe, DatePipe, StatusBadgeComponent],
   templateUrl: './order-card.component.html',
   styleUrl: './order-card.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  // The card's colours follow the status (see the CSS), so each order stands out from its neighbours.
+  host: { '[attr.data-status]': 'order().status' }
 })
 export class OrderCardComponent {
   readonly order = input.required<Order>();

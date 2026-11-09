@@ -5,6 +5,91 @@
   container-type: inline-size;
 }
 
+/*
+ * Colour-coded by status, like kitchen tickets: a stripe down the left edge and a tinted header in the same colour
+ * as the status badge. Unknown statuses fall back to grey.
+ */
+:host {
+  --status: var(--bs-secondary);
+  --status-soft: var(--bs-secondary-bg-subtle);
+}
+
+:host([data-status="Pending"]) {
+  --status: var(--bs-warning);
+  --status-soft: var(--bs-warning-bg-subtle);
+}
+
+:host([data-status="Preparing"]) {
+  --status: var(--bs-info);
+  --status-soft: var(--bs-info-bg-subtle);
+}
+
+:host([data-status="Ready"]) {
+  --status: var(--bs-success);
+  --status-soft: var(--bs-success-bg-subtle);
+}
+
+:host([data-status="Cancelled"]) {
+  --status: var(--bs-danger);
+  --status-soft: var(--bs-danger-bg-subtle);
+}
+
+.card {
+  overflow: hidden;
+  box-shadow: 0 0.25rem 0.9rem rgba(27, 11, 46, 0.08);
+}
+
+/* Drawn over the header too, so the stripe runs the card's full height. */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: 1;
+  width: 6px;
+  background: var(--status);
+}
+
+.card-header {
+  background: var(--status-soft);
+  border-bottom: 1px solid color-mix(in srgb, var(--status) 35%, transparent);
+  padding-left: 1.4rem;
+}
+
+.card-body,
+.card-footer {
+  padding-left: 1.4rem;
+}
+
+.card-footer {
+  background: transparent;
+}
+
+.ticket-number {
+  font-family: var(--display-font);
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Ready to hand over: a soft glow in the stripe's colour draws the eye. */
+:host([data-status="Ready"]) .card {
+  box-shadow: 0 0 0 2px var(--status), 0 0.4rem 1.2rem rgba(25, 135, 84, 0.25);
+}
+
+/* Finished orders step back so the ones still in progress stand out; they come back on hover or focus. */
+:host([data-status="Completed"]),
+:host([data-status="Cancelled"]) {
+  opacity: 0.65;
+  transition: opacity 0.2s ease;
+}
+
+:host([data-status="Completed"]:hover),
+:host([data-status="Completed"]:focus-within),
+:host([data-status="Cancelled"]:hover),
+:host([data-status="Cancelled"]:focus-within) {
+  opacity: 1;
+}
+
 .item-name,
 .address {
   min-width: 0;
