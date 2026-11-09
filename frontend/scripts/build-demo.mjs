@@ -24,7 +24,12 @@ const imageDir = join(root, 'src/demo/images');
 const images = Object.fromEntries(readdirSync(imageDir).filter(f => f.endsWith('.jpg')).map(f =>
   [`https://images.unsplash.com/photo-${f.replace(/\.jpg$/, '')}`, dataUri(join(imageDir, f), 'image/jpeg')]));
 
-const page = `<title>Restaurant Ordering Demo</title>
+// The viewport tag matters: without it phones lay the page out ~980px wide and zoom out, so it slides sideways
+// and none of the responsive styles apply.
+const page = `<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Restaurant Ordering Demo</title>
 <style>
 ${styles}
 .demo-banner { background: #1f2a33; color: #f4f6f8; }
