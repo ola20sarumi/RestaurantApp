@@ -1,5 +1,45 @@
-/* Fills its grid column, so cards in a row have equal heights. */
+/* Fills its grid column, so cards in a row have equal heights. It adapts to its own width (one to three per row). */
 :host {
   display: block;
   height: 100%;
+  container-type: inline-size;
+}
+
+.item-name,
+.address {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Status buttons fill each row evenly, so a narrow card doesn't leave a ragged last row. */
+.status-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.status-buttons .btn {
+  flex: 1 1 auto;
+}
+
+/* Wide cards: the five statuses fit on one line at their natural width. */
+@container (min-width: 32rem) {
+  .status-buttons .btn {
+    flex: 0 0 auto;
+  }
+}
+
+/* Narrow cards: the time drops to its own line under the order number. */
+@container (max-width: 18rem) {
+  .order-time {
+    width: 100%;
+    margin-left: 0 !important;
+  }
+}
+
+/* Touch screens: 44px tall status and "Mark as paid" buttons. */
+@media (pointer: coarse) {
+  .touch-target {
+    min-height: 2.75rem;
+  }
 }

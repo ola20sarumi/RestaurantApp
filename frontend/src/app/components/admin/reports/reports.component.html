@@ -11,7 +11,7 @@
       </p>
     }
   </div>
-  <div class="d-flex gap-2">
+  <div class="d-flex flex-wrap gap-2">
     <a class="btn btn-outline-secondary btn-sm" routerLink="/admin">
       <i class="bi bi-pencil-square me-1"></i>Menu management
     </a>
@@ -73,32 +73,32 @@
 @if (report(); as r) {
   <div [class.opacity-50]="loading()">
     <!-- Totals -->
-    <div class="row g-3 mb-4">
+    <div class="row g-2 g-sm-3 mb-4">
       <div class="col-6 col-lg-3">
         <div class="card border-0 shadow-sm h-100 p-3 stat">
           <div class="small text-body-secondary"><i class="bi bi-check-circle me-1 text-success"></i>Completed orders</div>
-          <div class="fs-3 fw-bold" data-testid="completed-orders">{{ r.completedOrders }}</div>
+          <div class="stat-value fw-bold" data-testid="completed-orders">{{ r.completedOrders }}</div>
           <div class="small text-body-secondary">Paid and served, picked up or delivered</div>
         </div>
       </div>
       <div class="col-6 col-lg-3">
         <div class="card border-0 shadow-sm h-100 p-3 stat">
           <div class="small text-body-secondary"><i class="bi bi-cash-coin me-1 text-brand"></i>Revenue</div>
-          <div class="fs-3 fw-bold" data-testid="revenue">{{ r.revenue | currency }}</div>
+          <div class="stat-value fw-bold" data-testid="revenue">{{ r.revenue | currency }}</div>
           <div class="small text-body-secondary">Avg. {{ averageOrder() | currency }} per order</div>
         </div>
       </div>
       <div class="col-6 col-lg-3">
         <div class="card border-0 shadow-sm h-100 p-3 stat">
           <div class="small text-body-secondary"><i class="bi bi-x-circle me-1 text-danger"></i>Cancelled orders</div>
-          <div class="fs-3 fw-bold" data-testid="cancelled-orders">{{ r.cancelledOrders }}</div>
+          <div class="stat-value fw-bold" data-testid="cancelled-orders">{{ r.cancelledOrders }}</div>
           <div class="small text-body-secondary">Not counted in revenue</div>
         </div>
       </div>
       <div class="col-6 col-lg-3">
         <div class="card border-0 shadow-sm h-100 p-3 stat">
           <div class="small text-body-secondary"><i class="bi bi-basket me-1 text-brand"></i>Items sold</div>
-          <div class="fs-3 fw-bold" data-testid="items-sold">{{ r.itemsSold }}</div>
+          <div class="stat-value fw-bold" data-testid="items-sold">{{ r.itemsSold }}</div>
           <div class="small text-body-secondary">In completed orders</div>
         </div>
       </div>
@@ -116,14 +116,14 @@
                   <tr>
                     <th scope="col">Type</th>
                     <th scope="col" class="text-end">Completed</th>
-                    <th scope="col" class="text-end">Cancelled</th>
+                    <th scope="col" class="text-end d-none d-sm-table-cell">Cancelled</th>
                     <th scope="col" class="text-end">Revenue</th>
                   </tr>
                 </thead>
                 <tbody>
                   @for (row of r.byFulfillment; track row.fulfillmentType) {
                     <tr>
-                      <td>
+                      <td class="text-nowrap">
                         <i class="bi {{ fulfillmentOption(row.fulfillmentType)?.icon }} me-1 text-brand"></i>
                         {{ fulfillmentOption(row.fulfillmentType)?.label }}
                       </td>
@@ -131,8 +131,8 @@
                         {{ row.completedOrders }}
                         <span class="small text-body-secondary d-none d-sm-inline">{{ completedLabel(row.fulfillmentType) }}</span>
                       </td>
-                      <td class="text-end">{{ row.cancelledOrders }}</td>
-                      <td class="text-end">{{ row.revenue | currency }}</td>
+                      <td class="text-end d-none d-sm-table-cell">{{ row.cancelledOrders }}</td>
+                      <td class="text-end text-nowrap">{{ row.revenue | currency }}</td>
                     </tr>
                   }
                 </tbody>
@@ -164,7 +164,7 @@
                       <tr>
                         <td>{{ product.name }}</td>
                         <td class="text-end">{{ product.quantity }}</td>
-                        <td class="text-end">{{ product.revenue | currency }}</td>
+                        <td class="text-end text-nowrap">{{ product.revenue | currency }}</td>
                       </tr>
                     }
                   </tbody>
@@ -187,17 +187,17 @@
                     <tr>
                       <th scope="col">Date</th>
                       <th scope="col" class="text-end">Completed</th>
-                      <th scope="col" class="text-end">Cancelled</th>
+                      <th scope="col" class="text-end d-none d-sm-table-cell">Cancelled</th>
                       <th scope="col" class="text-end">Revenue</th>
                     </tr>
                   </thead>
                   <tbody>
                     @for (day of r.days; track day.date) {
                       <tr [class.text-body-secondary]="day.completedOrders === 0 && day.cancelledOrders === 0">
-                        <td>{{ day.date | date: 'EEE d MMM' }}</td>
+                        <td class="text-nowrap">{{ day.date | date: 'EEE d MMM' }}</td>
                         <td class="text-end">{{ day.completedOrders }}</td>
-                        <td class="text-end">{{ day.cancelledOrders }}</td>
-                        <td class="text-end">{{ day.revenue | currency }}</td>
+                        <td class="text-end d-none d-sm-table-cell">{{ day.cancelledOrders }}</td>
+                        <td class="text-end text-nowrap">{{ day.revenue | currency }}</td>
                       </tr>
                     }
                   </tbody>
@@ -205,8 +205,8 @@
                     <tr class="fw-bold">
                       <td>Total</td>
                       <td class="text-end">{{ r.completedOrders }}</td>
-                      <td class="text-end">{{ r.cancelledOrders }}</td>
-                      <td class="text-end">{{ r.revenue | currency }}</td>
+                      <td class="text-end d-none d-sm-table-cell">{{ r.cancelledOrders }}</td>
+                      <td class="text-end text-nowrap">{{ r.revenue | currency }}</td>
                     </tr>
                   </tfoot>
                 </table>

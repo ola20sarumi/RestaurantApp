@@ -1,5 +1,14 @@
-.stat .fs-3 {
+/* Stat cards are two per row on phones: the number scales with the card's own width (container query units) and
+   long naira amounts wrap instead of overflowing. */
+.stat {
+  container-type: inline-size;
+  padding: clamp(0.75rem, 0.6rem + 0.75vw, 1rem) !important;
+}
+
+.stat-value {
+  font-size: clamp(1.1rem, 0.6rem + 9cqi, 1.75rem);
   line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 /* Long menus scroll inside the card instead of stretching the page. */
