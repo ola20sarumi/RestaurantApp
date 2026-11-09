@@ -11,6 +11,7 @@ import { CartItem } from '../../../models/restaurant.models';
   selector: 'app-order-summary',
   imports: [CurrencyPipe],
   templateUrl: './order-summary.component.html',
+  styleUrl: './order-summary.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'd-block' }
 })

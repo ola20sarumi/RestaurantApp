@@ -1,14 +1,25 @@
 <div class="card border-0 checkout-card">
   <form #checkoutForm="ngForm" (ngSubmit)="submit(checkoutForm)" novalidate>
     <!-- Step 1: order type -->
-    <fieldset class="checkout-step">
+    <fieldset class="checkout-step order-type-step" #orderTypeStep
+              [class.needs-choice]="checkoutForm.submitted && !fulfillmentType"
+              [attr.aria-describedby]="checkoutForm.submitted && !fulfillmentType ? 'order-type-error' : null">
       <legend class="step-title"><span class="step-num" aria-hidden="true">1</span>How would you like your order?</legend>
-      <div class="row row-cols-1 row-cols-sm-3 g-2">
+      @if (checkoutForm.submitted && !fulfillmentType) {
+        <!-- Keyed on the attempt, so the alert is re-created and its shake replays on every tap of the button. -->
+        @for (attempt of [missingTypeAttempts]; track attempt) {
+          <div id="order-type-error" class="alert alert-danger choice-alert" role="alert">
+            <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+            <span><strong>Please choose how you'd like your order.</strong> Pick Eat In, Takeout or Delivery to continue.</span>
+          </div>
+        }
+      }
+      <div class="row row-cols-1 row-cols-sm-3 g-2 type-tiles">
         @for (option of fulfillmentOptions; track option.value) {
           <div class="col">
             <input type="radio" class="btn-check" name="fulfillmentType" [id]="'type-' + option.value"
                    [value]="option.value" [ngModel]="fulfillmentType" (ngModelChange)="selectOrderType($event)">
-            <label class="btn btn-outline-primary w-100 h-100 py-3 order-type" [for]="'type-' + option.value">
+            <label class="btn btn-outline-primary w-100 h-100 py-2 py-sm-3 order-type type-tile" [for]="'type-' + option.value">
               <span class="type-icon"><i [class]="'bi ' + option.icon"></i></span>
               <span class="fw-semibold d-block">{{ option.label }}</span>
               <small class="hint d-block">{{ option.hint }}</small>
@@ -16,9 +27,6 @@
           </div>
         }
       </div>
-      @if (checkoutForm.submitted && !fulfillmentType) {
-        <div class="text-danger small mt-2" role="alert">Please choose how you'd like your order.</div>
-      }
     </fieldset>
 
     <!-- Step 2: customer details — name always; phone for takeout/delivery; address for delivery -->

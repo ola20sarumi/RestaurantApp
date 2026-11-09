@@ -1,5 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, input, output, viewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 
 import { CustomerDetails, FULFILLMENT_OPTIONS, FulfillmentType, PaymentMethod } from '../../../models/restaurant.models';
@@ -38,6 +38,10 @@ export class CheckoutFormComponent {
   customerEmail = '';
   /** How an online payer identifies themselves to Paystack. */
   payerContact: 'Email' | 'Phone' = 'Email';
+  /** Times the form was submitted without an order type; keys the alert so its shake replays. */
+  missingTypeAttempts = 0;
+
+  private readonly orderTypeStep = viewChild<ElementRef<HTMLElement>>('orderTypeStep');
 
   /** Eat-in orders only need a name; takeout and delivery also need a phone number. */
   get needsPhone(): boolean {
@@ -62,7 +66,11 @@ export class CheckoutFormComponent {
   submit(form: NgForm): void {
     // Field errors are shown in the template once the form has been submitted.
     // Hidden fields (e.g. the address for takeout) are removed from the form, so they don't block submitting.
-    if (!this.fulfillmentType || form.invalid || this.submitting()) return;
+    if (!this.fulfillmentType) {
+      this.showOrderTypeStep();
+      return;
+    }
+    if (form.invalid || this.submitting()) return;
 
     this.placeOrder.emit({
       fulfillmentType: this.fulfillmentType,
@@ -72,5 +80,18 @@ export class CheckoutFormComponent {
       paymentMethod: this.paysOnline ? 'Online' : 'Counter',
       customerEmail: this.paysOnline && !this.paysByPhone ? this.customerEmail.trim() : undefined
     });
+  }
+
+  /**
+   * No order type yet: the submit button can be a long way below the tiles (on phones they're often off-screen), so
+   * bring the step back into view and move focus to the first option, where the alert explains what's missing.
+   */
+  private showOrderTypeStep(): void {
+    this.missingTypeAttempts++;
+    const step = this.orderTypeStep()?.nativeElement;
+    if (!step) return;
+    const reduceMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    step.scrollIntoView?.({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    step.querySelector<HTMLInputElement>('input[name="fulfillmentType"]')?.focus({ preventScroll: true });
   }
 }

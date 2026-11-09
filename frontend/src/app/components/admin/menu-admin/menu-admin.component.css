@@ -10,15 +10,56 @@
 .form-card {
   top: 5rem; /* clear the sticky navbar */
   z-index: 1;
+  padding: clamp(1.1rem, 0.8rem + 1.5vw, 1.5rem);
+}
+
+/* Search, category filter and "Add product": they share the row and wrap as the space runs out. */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .search {
-  max-width: 240px;
+  flex: 1 1 12rem;
+  max-width: 20rem;
 }
 
 .filter {
+  flex: 1 1 9rem;
   width: auto;
-  min-width: 170px;
+  max-width: 14rem;
+}
+
+.add-btn {
+  margin-left: auto;
+}
+
+.min-w-0 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Touch screens: 44px-wide edit/delete buttons (the shared styles make them 44px tall) and tabs. */
+@media (pointer: coarse) {
+  .row-actions .btn {
+    min-width: 2.75rem;
+  }
+
+  .nav-pills .nav-link {
+    min-height: 2.75rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .products {
+    font-size: 0.95rem;
+  }
+
+  .products > :not(caption) > * > * {
+    padding-inline: 0.4rem;
+  }
 }
 
 .thumb {
@@ -31,7 +72,7 @@
 .preview {
   display: block;
   width: 100%;
-  max-height: 160px;
+  aspect-ratio: 16 / 9;
   object-fit: cover;
 }
 

@@ -1,22 +1,95 @@
 :host(.cart-row) {
-  padding: 1rem 1.25rem;
+  /* The row lays itself out by the width of the cart card, not the screen. */
+  container-type: inline-size;
+  padding: clamp(0.85rem, 0.7rem + 0.75vw, 1rem) clamp(0.85rem, 0.6rem + 1.25vw, 1.25rem);
   transition: background-color 0.2s ease;
   animation: slide-in 0.4s ease both;
 }
 
-:host(.cart-row:hover) {
-  background-color: #fffaf4;
+@media (hover: hover) {
+  :host(.cart-row:hover) {
+    background-color: #fffaf4;
+  }
+}
+
+/* Narrow rows: a 2x2 grid, dish | remove on top and stepper | subtotal underneath, so nothing has to shrink below
+   a 44px tap target on a 320px phone. From 32rem of row width: everything on one line. */
+.line {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "dish remove"
+    "qty subtotal";
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.line-dish {
+  grid-area: dish;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.min-w-0 {
+  min-width: 0;
+}
+
+/* The stepper, subtotal and remove button join the grid directly on narrow rows. */
+.line-actions {
+  display: contents;
+}
+
+.qty {
+  grid-area: qty;
+  justify-self: start;
+}
+
+.subtotal {
+  grid-area: subtotal;
+}
+
+.remove-btn {
+  grid-area: remove;
+  flex-shrink: 0;
+}
+
+@container (min-width: 32rem) {
+  .line {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .line-dish {
+    flex: 1 1 auto;
+    gap: 1rem;
+  }
+
+  .line-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  /* Same width in every row, so the subtotals line up. */
+  .subtotal {
+    min-width: 5.5rem;
+  }
 }
 
 .dish-name {
   font-family: var(--display-font);
   font-weight: 800;
   font-size: 1.1rem;
+  overflow-wrap: anywhere;
 }
 
 /* Pill-shaped quantity stepper. */
 .qty {
-  width: 124px;
+  flex: none;
+  width: auto;
   padding: 3px;
   border-radius: 999px;
   background: var(--accent-soft);
@@ -31,6 +104,7 @@
   --bs-btn-hover-border-color: transparent;
   --bs-btn-active-bg: var(--brand-dark);
   --bs-btn-active-color: #fff;
+  flex-shrink: 0;
   width: 2rem;
   height: 2rem;
   padding: 0;
@@ -40,7 +114,7 @@
 
 .qty .input-group-text {
   flex: 1;
-  min-width: 40px;
+  min-width: 2.5rem;
   border: 0;
   background: transparent;
   font-weight: 800;
@@ -49,7 +123,8 @@
 }
 
 .subtotal {
-  min-width: 90px;
+  min-width: 0;
+  white-space: nowrap;
   font-family: var(--display-font);
   font-weight: 800;
   font-size: 1.1rem;
@@ -63,9 +138,25 @@
   color: #b4a7bd;
 }
 
-.remove-btn:hover {
+@media (hover: hover) {
+  .remove-btn:hover {
+    background: #ffe3e3;
+    color: #dc3545;
+  }
+}
+
+.remove-btn:active {
   background: #ffe3e3;
   color: #dc3545;
+}
+
+/* Touch screens: 44px tap targets for the stepper and the remove button. */
+@media (pointer: coarse) {
+  .qty .btn,
+  .remove-btn {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
 }
 
 @keyframes slide-in {

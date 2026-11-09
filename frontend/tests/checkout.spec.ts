@@ -18,7 +18,12 @@ test.describe('Checkout', () => {
 
     test('asks for an order type before submitting', async ({ page }) => {
       await page.getByRole('button', { name: 'Confirm & Place Order' }).click();
-      await expect(page.getByText("Please choose how you'd like your order.")).toBeVisible();
+      const alert = page.getByRole('alert');
+      await expect(alert).toContainText("Please choose how you'd like your order.");
+      await expect(alert).toBeInViewport();
+      // Focus moves to the first option, so keyboard users can pick one straight away.
+      await expect(page.locator('#type-DineIn')).toBeFocused();
+      await expect(page).toHaveURL(/\/checkout$/);
     });
 
     test('only shows the fields each order type needs', async ({ page }) => {

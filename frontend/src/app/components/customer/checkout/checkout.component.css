@@ -1,4 +1,5 @@
-@media (min-width: 768px) {
+/* Beside the form (lg and up) the summary stays in view while the form scrolls. */
+@media (min-width: 992px) {
   .summary-sticky {
     position: sticky;
     top: 6rem;
