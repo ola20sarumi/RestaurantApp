@@ -94,13 +94,13 @@ test.describe('phone (360px)', () => {
     expect((await nav.boundingBox())!.height).toBeLessThan(70);
   });
 
-  test('the category filter is one swipeable row', async ({ page }) => {
+  test('every category chip is fully on screen', async ({ page }) => {
     await gotoApp(page, '/menu');
-    const filter = page.getByRole('group', { name: 'Filter by category' });
-    const chips = filter.getByRole('button');
-    const tops = await chips.evaluateAll(buttons => buttons.map(b => Math.round(b.getBoundingClientRect().top)));
-    expect(new Set(tops).size).toBe(1);
-    await expect(filter).toHaveCSS('overflow-x', 'auto');
+    const chips = page.getByRole('group', { name: 'Filter by category' }).getByRole('button');
+    await expect(chips.filter({ hasText: 'Main Courses' })).toBeVisible();
+    for (const chip of await chips.all()) {
+      await expect(chip).toBeInViewport({ ratio: 1 });
+    }
   });
 });
 
