@@ -2,8 +2,8 @@
   <div class="container">
     <a class="navbar-brand fw-bold d-flex align-items-center gap-2" routerLink="/menu" aria-label="Restaurant">
       <span class="brand-mark"><i class="bi bi-fire"></i></span>
-      <!-- Signed-in staff get up to six links, so the wordmark makes room for them on phones. -->
-      <span class="brand-name" [class.d-none]="auth.session()" [class.d-sm-inline]="auth.session()">Restaurant</span>
+      <!-- Signed-in staff get up to six links, so below 992px the wordmark makes room for them. -->
+      <span class="brand-name" [class.d-none]="auth.session()" [class.d-lg-inline]="auth.session()">Restaurant</span>
     </a>
 
     <ul class="navbar-nav ms-auto align-items-center">
@@ -29,25 +29,25 @@
           <li class="nav-item ms-sm-2">
             <a class="btn btn-sm btn-outline-secondary" routerLink="/admin" routerLinkActive="active"
                [routerLinkActiveOptions]="{ exact: true }" aria-label="Admin">
-              <i class="bi bi-pencil-square me-sm-1"></i><span class="d-none d-sm-inline">Admin</span>
+              <i class="bi bi-pencil-square me-lg-1"></i><span class="d-none d-lg-inline">Admin</span>
             </a>
           </li>
           <li class="nav-item">
             <a class="btn btn-sm btn-outline-secondary" routerLink="/admin/reports" routerLinkActive="active"
                aria-label="Reports">
-              <i class="bi bi-graph-up me-sm-1"></i><span class="d-none d-sm-inline">Reports</span>
+              <i class="bi bi-graph-up me-lg-1"></i><span class="d-none d-lg-inline">Reports</span>
             </a>
           </li>
         }
         <li class="nav-item" [class.ms-sm-2]="session.role !== 'Admin'">
           <a class="btn btn-sm btn-outline-secondary" routerLink="/cashier" routerLinkActive="active" aria-label="Cashier">
-            <i class="bi bi-person-badge me-sm-1"></i><span class="d-none d-sm-inline">Cashier</span>
+            <i class="bi bi-person-badge me-lg-1"></i><span class="d-none d-lg-inline">Cashier</span>
           </a>
         </li>
         <li class="nav-item">
           <button type="button" class="btn btn-sm btn-link" (click)="logout()" [title]="'Signed in as ' + session.username"
                   aria-label="Sign out">
-            <i class="bi bi-box-arrow-right me-sm-1"></i><span class="d-none d-sm-inline">Sign out</span>
+            <i class="bi bi-box-arrow-right me-lg-1"></i><span class="d-none d-lg-inline">Sign out</span>
           </button>
         </li>
       }
